@@ -8,8 +8,8 @@ router.post('/', async (req, res) => {
     const response = await database.insert(req.body);
     res.status(201).json(response);
   } catch (error) {
-    console.error('Error al crear mantenimiento:', error);
-    res.status(500).json({ error: 'Error al crear el mantenimiento.' });
+    console.error('Error creating maintenance:', error);
+    res.status(500).json({ error: 'Error creating maintenance.' });
   }
 });
 
@@ -20,8 +20,8 @@ router.get('/', async (req, res) => {
     const maintenances = response.rows.map(row => row.doc);
     res.status(200).json(maintenances);
   } catch (error) {
-    console.error('Error al listar mantenimientos:', error);
-    res.status(500).json({ error: 'Error al listar los mantenimientos.' });
+    console.error('Error listing maintenances:', error);
+    res.status(500).json({ error: 'Error listing maintenances.' });
   }
 });
 
@@ -31,8 +31,8 @@ router.get('/:id', async (req, res) => {
     const response = await database.get(req.params.id);
     res.status(200).json(response);
   } catch (error) {
-    console.error('Error al obtener mantenimiento:', error);
-    res.status(404).json({ error: 'Mantenimiento no encontrado.' });
+    console.error('Error fetching maintenance:', error);
+    res.status(404).json({ error: 'Maintenance not found.' });
   }
 });
 
@@ -44,8 +44,8 @@ router.put('/:id', async (req, res) => {
     const response = await database.insert(updatedDoc);
     res.status(200).json(response);
   } catch (error) {
-    console.error('Error al actualizar mantenimiento:', error);
-    res.status(500).json({ error: 'Error al actualizar el mantenimiento.' });
+    console.error('Error updating maintenance:', error);
+    res.status(500).json({ error: 'Error updating maintenance.' });
   }
 });
 
@@ -56,8 +56,8 @@ router.delete('/:id', async (req, res) => {
     const response = await database.destroy(doc._id, doc._rev);
     res.status(200).json(response);
   } catch (error) {
-    console.error('Error al eliminar mantenimiento:', error);
-    res.status(500).json({ error: 'Error al eliminar el mantenimiento.' });
+    console.error('Error deleting maintenance:', error);
+    res.status(500).json({ error: 'Error deleting maintenance.' });
   }
 });
 

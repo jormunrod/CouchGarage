@@ -10,10 +10,23 @@ services:
     volumes:
       - couchdb_data:/opt/couchdb/data # Data persistency
 
+  init-couchdb:
+    build:
+      context: .
+      dockerfile: docker/init.Dockerfile
+    container_name: init-couchdb
+    environment:
+      - COUCHDB_USER=${COUCHDB_USER}
+      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+    depends_on:
+      - couchdb
+    restart: "no"
+      
+
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: ../docker/backend.Dockerfile
     container_name: backend
     ports:
       - "3000:3000"
@@ -24,6 +37,9 @@ services:
       - COUCHDB_DATABASE=${COUCHDB_DATABASE}
     depends_on:
       - couchdb # CouchDB needs to be running before the backend
+      - init-couchdb # Init script needs to run before the backend
+
+
   #frontend:
   #  build:
   #    context: ./frontend
