@@ -12,3 +12,34 @@ El proyecto está pensado para:
 - Entusiastas de los coches que deseen llevar un control detallado de sus mantenimientos.
 - Talleres mecánicos que necesiten una herramienta básica para registrar los servicios realizados.
 - Estudiantes y desarrolladores interesados en explorar las capacidades de CouchDB y React.
+
+## **Ejecutar el Proyecto en Local (Docker)**
+Para ejecutar el proyecto en local, asegúrate de tener Docker instalado y sigue estos pasos:
+
+1. **Clona el repositorio:**
+   ```bash
+   git clone ssh://github.com/jormunrod/CouchGarage
+   ```
+
+2. **Navega al directorio del proyecto:**
+   ```bash
+    cd CouchGarage
+    ```
+
+3. **Construye y ejecuta los contenedores:**
+    ```bash
+    docker-compose up --build
+    ```
+    o
+    ```bash
+    docker compose up --build
+    ```
+
+4. **Accede a la aplicación:**
+    - Frontend: [http://localhost:3000](http://localhost:3000)
+    - Backend: [http://localhost:5984](http://localhost:5984) (CouchDB)
+
+5. **Accede a la interfaz de CouchDB:**
+    - [http://localhost:5984/_utils/](http://localhost:5984/_utils/)
+    - Usuario: `admin`
+    - Contraseña: `admin`
