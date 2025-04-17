@@ -36,7 +36,7 @@ Para ejecutar el proyecto en local, asegúrate de tener Docker instalado y sigue
     ```
 
 4. **Accede a la aplicación:**
-    - Frontend: [http://localhost:8080](http://localhost:8080)
+    - Frontend: [http://localhost:80](http://localhost:80)
     - Backend: [http://localhost:3000](http://localhost:3000)
     - CouchDB: [http://localhost:5984](http://localhost:5984)
 
