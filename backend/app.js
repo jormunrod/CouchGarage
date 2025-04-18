@@ -1,10 +1,12 @@
-const express = require('express');
-const maintenanceRoutes = require('./routes/maintenance');
-require('dotenv').config();
+const express = require("express");
+const maintenanceRoutes = require("./routes/maintenance");
+const authRoutes = require("./routes/auth");
+require("dotenv").config();
+const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const { getDatabase } = require('./utils/couchdb');
+const { getDatabase } = require("./utils/couchdb");
 
 (async () => {
   try {
@@ -18,12 +20,22 @@ const { getDatabase } = require('./utils/couchdb');
 // Middleware
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.send('The backend is running');
-  });
+app.get("/", (req, res) => {
+  res.send("The backend is running");
+});
+
+// CORS configuration
+app.use(
+  cors({
+    origin: ["http://localhost:3001", "http://localhost"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 // Routes
-app.use('/api/maintenance', maintenanceRoutes);
+app.use("/api/maintenance", maintenanceRoutes);
+app.use("/api/auth", authRoutes);
 
 // Initialize the server
 app.listen(PORT, () => {

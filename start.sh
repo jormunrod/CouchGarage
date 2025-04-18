@@ -34,6 +34,9 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# Log file for errors
+LOG_FILE="couchgarage_errors.log"
+
 # Detect whether to use "docker compose" or "docker-compose"
 if docker compose version &>/dev/null; then
   DOCKER_COMPOSE_CMD="docker compose"
@@ -43,33 +46,54 @@ fi
 
 TIMEOUT=300
 
+# Function: log_error
+# Description: Log errors to the log file with a timestamp.
+log_error() {
+  echo -e "${RED}Error: $1${NC}" >&2
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
+}
+
 # Function: check_env_file
 # Description: Warn the user if the .env file does not exist.
 check_env_file() {
   if [ ! -f .env ]; then
-    echo -e "${YELLOW}WARNING: It seems that the .env file is missing. Environment variables may not be set correctly.${NC}"
+    local message="WARNING: It seems that the .env file is missing. Environment variables may not be set correctly."
+    echo -e "${YELLOW}${message}${NC}"
+    log_error "${message}"
   fi
 }
 
+# Function: wait_for_log
+# Description: Wait until a specific log message is found in a container's logs.
 # Function: wait_for_log
 # Description: Wait until a specific log message is found in a container's logs.
 wait_for_log() {
   local container=$1
   local search_text="$2"
   local elapsed=0
-  printf "${CYAN}Waiting in container ${YELLOW}%s${CYAN} for signal: '${YELLOW}%s${CYAN}'${NC}" "$container" "$search_text"
-  while true; do
-    if docker logs "$container" --tail=50 2>/dev/null | grep -q "$search_text"; then
-      printf "\n${GREEN}Signal received in ${YELLOW}%s${GREEN}!${NC}\n" "$container"
+
+  echo -e "${CYAN}Waiting in container ${YELLOW}${container}${CYAN} for signal: '${YELLOW}${search_text}${CYAN}'${NC}"
+  echo -e "${CYAN}Displaying logs from container ${YELLOW}${container}${CYAN} in real-time...${NC}"
+
+  # Start a background process to show logs in real time
+  docker logs -f "$container" 2>&1 | while read -r line; do
+    echo -e "${BLUE}[${container}]${NC} $line"
+    if echo "$line" | grep -q "$search_text"; then
+      echo -e "${GREEN}Signal '${search_text}' received in container ${YELLOW}${container}${GREEN}.${NC}"
+      kill $! # Kill the background log process
       break
-    else
-      printf "."
-      sleep 2
-      elapsed=$((elapsed + 2))
-      if [ "$elapsed" -ge "$TIMEOUT" ]; then
-        printf "\n${RED}Timeout reached waiting for signal '%s' in container %s.${NC}\n" "$search_text" "$container"
-        break
-      fi
+    fi
+  done &
+  local log_pid=$!
+
+  # Timeout mechanism
+  while kill -0 "$log_pid" 2>/dev/null; do
+    sleep 2
+    elapsed=$((elapsed + 2))
+    if [ "$elapsed" -ge "$TIMEOUT" ]; then
+      echo -e "${RED}\nTimeout reached waiting for signal '${search_text}' in container ${container}.${NC}"
+      kill "$log_pid" 2>/dev/null
+      break
     fi
   done
 }
@@ -77,7 +101,6 @@ wait_for_log() {
 # Function: start_containers
 # Description: Start the application containers in production or development mode.
 start_containers() {
-  # Check for .env file and warn if missing
   check_env_file
   
   local mode=$1
@@ -93,7 +116,10 @@ start_containers() {
     FRONTEND_CONTAINER="frontend-dev"
   fi
 
-  $DOCKER_COMPOSE_CMD $COMPOSE_FILES up --build -d
+  if ! $DOCKER_COMPOSE_CMD $COMPOSE_FILES up --build -d 2>>"$LOG_FILE"; then
+    log_error "Failed to start containers in mode ${mode}."
+    return 1
+  fi
   
   wait_for_log "$BACKEND_CONTAINER" "Server running at"
 
@@ -107,7 +133,9 @@ start_containers() {
       sleep 2
       elapsed=$((elapsed + 2))
       if [ "$elapsed" -ge "$TIMEOUT" ]; then
-        printf "\n${RED}Timeout reached for container %s.${NC}\n" "$FRONTEND_CONTAINER"
+        local message="Timeout reached for container ${FRONTEND_CONTAINER}."
+        printf "\n${RED}${message}${NC}\n"
+        log_error "${message}"
         break
       fi
     done
@@ -118,15 +146,15 @@ start_containers() {
   echo -e "${GREEN}Application started (or timeout reached).${NC}"
   echo -e "${BLUE}Access URLs:${NC}"
   echo -e "${YELLOW}CouchDB:${NC} http://localhost:5984/_utils"
-  echo -e "${YELLOW}Backend:${NC} http://localhost:3000"
   if [ "$mode" -eq 2 ]; then
     echo -e "${YELLOW}Frontend (Development):${NC} http://localhost:3001"
+    echo -e "${YELLOW}Backend (Development):${NC} http://localhost:3000"
   else
     echo -e "${YELLOW}Frontend (Production):${NC} http://localhost"
+    echo -e "${YELLOW}Backend (Production):${NC} http://localhost:3000"
   fi
   echo -e "${BLUE}---------------------------------------${NC}"
 
-  # Warn if .env is missing after displaying access URLs.
   check_env_file
 }
 
@@ -134,8 +162,11 @@ start_containers() {
 # Description: Stop all running containers.
 stop_containers() {
   echo -e "${RED}\nStopping containers...${NC}"
-  $DOCKER_COMPOSE_CMD down
-  echo -e "${RED}Containers stopped.${NC}"
+  if ! $DOCKER_COMPOSE_CMD down 2>>"$LOG_FILE"; then
+    log_error "Failed to stop containers."
+  else
+    echo -e "${RED}Containers stopped.${NC}"
+  fi
 }
 
 # Function: check_installation
@@ -147,10 +178,11 @@ check_installation() {
     echo -e "${GREEN}Docker is installed.${NC}"
     docker --version
   else
-    echo -e "${RED}Docker is NOT installed.${NC}"
+    local message="Docker is NOT installed."
+    echo -e "${RED}${message}${NC}"
+    log_error "${message}"
   fi
 
-  # Check for Docker Compose availability
   if docker compose version &>/dev/null; then
     echo -e "${GREEN}docker compose is available.${NC}"
     docker compose version
@@ -158,12 +190,15 @@ check_installation() {
     echo -e "${GREEN}docker-compose is available.${NC}"
     docker-compose version
   else
-    echo -e "${RED}Neither docker compose nor docker-compose are installed.${NC}"
+    local message="Neither docker compose nor docker-compose are installed."
+    echo -e "${RED}${message}${NC}"
+    log_error "${message}"
   fi
 
-  # Display Docker state
   echo -e "${CYAN}\nDocker Status:${NC}"
-  docker info --format '{{.ServerVersion}}' 2>/dev/null || echo -e "${RED}Failed to obtain Docker status.${NC}"
+  if ! docker info --format '{{.ServerVersion}}' 2>>"$LOG_FILE"; then
+    log_error "Failed to obtain Docker status."
+  fi
 }
 
 # Function: display_information
@@ -208,7 +243,9 @@ case $option in
     display_information
     ;;
   *)
-    echo -e "${RED}Invalid option. Please use 1, 2, 3, 4 or 5.${NC}"
+    local message="Invalid option. Please use 1, 2, 3, 4 or 5."
+    echo -e "${RED}${message}${NC}"
+    log_error "${message}"
     exit 1
     ;;
 esac

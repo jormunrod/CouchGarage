@@ -10,3 +10,9 @@ services:
       - ./frontend:/app
     environment:
       - NODE_ENV=development
+
+  backend:
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    command: ["npx", "nodemon", "app.js"]
