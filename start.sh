@@ -21,6 +21,9 @@ cat <<'EOF'
  | |_| | (_| | | | (_| | (_| |  __/
   \____|\__,_|_|  \__,_|\__, |\___|
                         |___/       
+Made with ♥ by:
+  @alepez12
+  @jormunrod
 EOF
 
 # Colors
@@ -39,6 +42,14 @@ else
 fi
 
 TIMEOUT=300
+
+# Function: check_env_file
+# Description: Warn the user if the .env file does not exist.
+check_env_file() {
+  if [ ! -f .env ]; then
+    echo -e "${YELLOW}WARNING: It seems that the .env file is missing. Environment variables may not be set correctly.${NC}"
+  fi
+}
 
 # Function: wait_for_log
 # Description: Wait until a specific log message is found in a container's logs.
@@ -64,8 +75,11 @@ wait_for_log() {
 }
 
 # Function: start_containers
-# Description: Start the application containers, either in production or development mode.
+# Description: Start the application containers in production or development mode.
 start_containers() {
+  # Check for .env file and warn if missing
+  check_env_file
+  
   local mode=$1
   if [ "$mode" -eq 1 ]; then
     echo -e "${GREEN}\nStarting application in ${YELLOW}PRODUCTION${NC} mode..."
@@ -111,6 +125,9 @@ start_containers() {
     echo -e "${YELLOW}Frontend (Production):${NC} http://localhost"
   fi
   echo -e "${BLUE}---------------------------------------${NC}"
+
+  # Warn if .env is missing after displaying access URLs.
+  check_env_file
 }
 
 # Function: stop_containers
@@ -150,7 +167,7 @@ check_installation() {
 }
 
 # Function: display_information
-# Description: Display project information and what this script does.
+# Description: Display project information and script functionality.
 display_information() {
   echo -e "${CYAN}\nProject Information:${NC}"
   echo -e "${GREEN}Project Name: CouchGarage${NC}"
@@ -159,10 +176,10 @@ display_information() {
   echo -e "  - Start the application in production or development mode."
   echo -e "  - Stop the application containers."
   echo -e "  - Check if Docker and Docker Compose are installed."
-  echo -e "  - Provide project information and usage details."
+  echo -e "  - Display project information and usage details."
 }
 
-# Trap: Handle Ctrl+C and SIGTERM to stop containers properly
+# Trap: Handle Ctrl+C and SIGTERM to stop containers properly.
 trap 'echo -e "\n\n${RED}Interrupt detected, stopping containers...${NC}"; stop_containers; exit 0' SIGINT SIGTERM
 
 # Menu Options
