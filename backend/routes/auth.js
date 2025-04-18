@@ -3,13 +3,11 @@ const express = require("express");
 const adminNano = require("nano")(
   `http://${process.env.COUCHDB_USER}:${process.env.COUCHDB_PASSWORD}@couchdb:5984`
 );
-const nano = require("nano")(
-  `http://${process.env.COUCHDB_USER}:${process.env.COUCHDB_PASSWORD}@couchdb:5984`
-);
+// Create a Nano instance without credentials for user session operations.
+const nanoAuth = require("nano")("http://couchdb:5984");
 
 const router = express.Router();
 const adminUsersDB = adminNano.use("_users");
-const usersDB = nano.use("_users");
 
 // Route to register a new user.
 // Uses the dedicated admin instance to ensure registration always runs with admin privileges.
@@ -56,12 +54,12 @@ router.post("/login", async (req, res) => {
 
   try {
     // Authenticate the user using CouchDB's _session endpoint.
-    const session = await nano.auth(username, password);
+    const session = await nanoAuth.auth(username, password);
 
     // Set the AuthSession cookie with httpOnly flag for extra security and a maxAge for persistence.
-    res.cookie("AuthSession", session.cookie, { 
+    res.cookie("AuthSession", session.cookie, {
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000  // 24 hours
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
     res.status(200).send({ message: "Login successful" });
   } catch (error) {
@@ -79,7 +77,9 @@ router.post("/login", async (req, res) => {
 router.get("/protected", async (req, res) => {
   try {
     // Retrieve session information from CouchDB using the request cookie.
-    const sessionInfo = await nano.session();
+    const sessionInfo = await nanoAuth.session({
+      headers: { Cookie: req.headers.cookie || "" },
+    });
 
     if (sessionInfo.userCtx && sessionInfo.userCtx.name) {
       res
@@ -99,8 +99,13 @@ router.get("/protected", async (req, res) => {
 // Route to log out
 router.post("/logout", async (req, res) => {
   try {
-    // Optionally, you can call CouchDB's DELETE /_session endpoint here to invalidate the session on the server side.
-    // For simplicity, we clear theAuthSession cookie so that subsequent requests will not be authenticated.
+    // Invalidate the session on the CouchDB server side, passing the client's cookie.
+    await nanoAuth.request({
+      method: "DELETE",
+      db: "_session",
+      headers: { Cookie: req.headers.cookie || "" },
+    });
+    // Clear the AuthSession cookie on the client.
     res.clearCookie("AuthSession");
     res.status(200).send({ message: "Logout successful" });
   } catch (error) {
