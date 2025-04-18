@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import car from './images/car.png';
 import './App.css';
 
@@ -10,6 +10,23 @@ function App() {
   const [view, setView] = useState('home'); // Manages the current view (home, register, login)
   const [user, setUser] = useState(null);
 
+  // Check if a session exists on app load to persist login
+  useEffect(() => {
+    // Assuming you have an endpoint to check the session (e.g. /api/auth/protected)
+    fetch(`${API_URL}/api/auth/protected`, { credentials: 'include' })
+      .then(async (response) => {
+        if (response.ok) {
+          const data = await response.json();
+          if (data.user && data.user.name) {
+            setUser({ username: data.user.name });
+          }
+        }
+      })
+      .catch((error) => {
+        console.log("No active session", error);
+      });
+  }, []);
+
   const renderView = () => {
     switch (view) {
       case 'register':
@@ -17,7 +34,7 @@ function App() {
       case 'login':
         return <Login setView={setView} setUser={setUser} />;
       default:
-        return <Home setView={setView} user={user} />;
+        return <Home setView={setView} user={user} setUser={setUser} />;
     }
   };
 
@@ -33,10 +50,13 @@ function App() {
 }
 
 // Home Component
-const Home = ({ setView, user }) => (
+const Home = ({ setView, user, setUser }) => (
   <div>
     {user ? (
-      <p>Hello, {user.username}. You are logged in!</p>
+      <>
+        <p>Hello, {user.username}. You are logged in!</p>
+        <LogoutButton setUser={setUser} setView={setView} API_URL={API_URL} />
+      </>
     ) : (
       <>
         <button onClick={() => setView('register')}>Register</button>
@@ -57,6 +77,7 @@ const Register = ({ setView }) => {
       const response = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Ensures cookies are sent and received
         body: JSON.stringify({ username, password }),
       });
 
@@ -108,6 +129,7 @@ const Login = ({ setView, setUser }) => {
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Ensures that cookies are stored in the browser
         body: JSON.stringify({ username, password }),
       });
 
@@ -148,6 +170,30 @@ const Login = ({ setView, setUser }) => {
       </button>
     </form>
   );
+};
+
+// LogoutButton Component
+const LogoutButton = ({ setUser, setView, API_URL }) => {
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include" // Ensure cookies are sent with the request.
+      });
+      if (response.ok) {
+        alert("Logout successful");
+        setUser(null);
+        setView("home");
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error} - ${errorData.details || ''}`);
+      }
+    } catch (error) {
+      alert("Error logging out");
+    }
+  };
+
+  return <button onClick={handleLogout}>Logout</button>;
 };
 
 export default App;

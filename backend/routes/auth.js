@@ -1,7 +1,5 @@
 const express = require("express");
 // Create a dedicated Nano instance with admin credentials for registration.
-// This ensures that registration always runs with admin privileges,
-// regardless of any active user session.
 const adminNano = require("nano")(
   `http://${process.env.COUCHDB_USER}:${process.env.COUCHDB_PASSWORD}@couchdb:5984`
 );
@@ -14,8 +12,7 @@ const adminUsersDB = adminNano.use("_users");
 const usersDB = nano.use("_users");
 
 // Route to register a new user.
-// Using the dedicated admin instance (adminUsersDB) prevents the error "You are not allowed to access this db"
-// even if a user is already logged in.
+// Uses the dedicated admin instance to ensure registration always runs with admin privileges.
 router.post("/register", async (req, res) => {
   const { username, password } = req.body;
 
@@ -59,11 +56,13 @@ router.post("/login", async (req, res) => {
 
   try {
     // Authenticate the user using CouchDB's _session endpoint.
-    // Since this uses our general nano instance, the session will respect the user's AuthSession cookie.
     const session = await nano.auth(username, password);
 
-    // Set the AuthSession cookie with httpOnly flag for extra security
-    res.cookie("AuthSession", session.cookie, { httpOnly: true });
+    // Set the AuthSession cookie with httpOnly flag for extra security and a maxAge for persistence.
+    res.cookie("AuthSession", session.cookie, { 
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000  // 24 hours
+    });
     res.status(200).send({ message: "Login successful" });
   } catch (error) {
     console.error("Error logging in:", error);
@@ -79,7 +78,7 @@ router.post("/login", async (req, res) => {
 // Protected route as an example
 router.get("/protected", async (req, res) => {
   try {
-    // Retrieve session information from CouchDB
+    // Retrieve session information from CouchDB using the request cookie.
     const sessionInfo = await nano.session();
 
     if (sessionInfo.userCtx && sessionInfo.userCtx.name) {
@@ -94,6 +93,21 @@ router.get("/protected", async (req, res) => {
     res
       .status(500)
       .send({ error: "Error validating session", details: error.message });
+  }
+});
+
+// Route to log out
+router.post("/logout", async (req, res) => {
+  try {
+    // Optionally, you can call CouchDB's DELETE /_session endpoint here to invalidate the session on the server side.
+    // For simplicity, we clear theAuthSession cookie so that subsequent requests will not be authenticated.
+    res.clearCookie("AuthSession");
+    res.status(200).send({ message: "Logout successful" });
+  } catch (error) {
+    console.error("Error logging out:", error);
+    res
+      .status(500)
+      .send({ error: "Error logging out", details: error.message });
   }
 });
 
