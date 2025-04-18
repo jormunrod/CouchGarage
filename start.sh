@@ -171,7 +171,6 @@ check_installation() {
 display_information() {
   echo -e "${CYAN}\nProject Information:${NC}"
   echo -e "${GREEN}Project Name: CouchGarage${NC}"
-  echo -e "${GREEN}Description: This project sets up a development and production environment for CouchGarage.${NC}"
   echo -e "${GREEN}Script Functionality:${NC}"
   echo -e "  - Start the application in production or development mode."
   echo -e "  - Stop the application containers."
