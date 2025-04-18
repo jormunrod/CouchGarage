@@ -146,11 +146,12 @@ start_containers() {
   echo -e "${GREEN}Application started (or timeout reached).${NC}"
   echo -e "${BLUE}Access URLs:${NC}"
   echo -e "${YELLOW}CouchDB:${NC} http://localhost:5984/_utils"
-  echo -e "${YELLOW}Backend:${NC} http://localhost:3000"
   if [ "$mode" -eq 2 ]; then
     echo -e "${YELLOW}Frontend (Development):${NC} http://localhost:3001"
+    echo -e "${YELLOW}Backend (Development):${NC} http://localhost:3000"
   else
     echo -e "${YELLOW}Frontend (Production):${NC} http://localhost"
+    echo -e "${YELLOW}Backend (Production):${NC} http://localhost:3000"
   fi
   echo -e "${BLUE}---------------------------------------${NC}"
 
