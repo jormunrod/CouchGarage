@@ -1,13 +1,21 @@
 const express = require("express");
-// Use credentials directly in the URL to avoid authentication issues.
+// Create a dedicated Nano instance with admin credentials for registration.
+// This ensures that registration always runs with admin privileges,
+// regardless of any active user session.
+const adminNano = require("nano")(
+  `http://${process.env.COUCHDB_USER}:${process.env.COUCHDB_PASSWORD}@couchdb:5984`
+);
 const nano = require("nano")(
   `http://${process.env.COUCHDB_USER}:${process.env.COUCHDB_PASSWORD}@couchdb:5984`
 );
 
 const router = express.Router();
+const adminUsersDB = adminNano.use("_users");
 const usersDB = nano.use("_users");
 
-// Route to register a new user
+// Route to register a new user.
+// Using the dedicated admin instance (adminUsersDB) prevents the error "You are not allowed to access this db"
+// even if a user is already logged in.
 router.post("/register", async (req, res) => {
   const { username, password } = req.body;
 
@@ -26,7 +34,7 @@ router.post("/register", async (req, res) => {
   };
 
   try {
-    await usersDB.insert(userDoc);
+    await adminUsersDB.insert(userDoc);
     res.status(201).send({ message: "User registered successfully" });
   } catch (error) {
     console.error("Error registering user:", error);
@@ -50,7 +58,8 @@ router.post("/login", async (req, res) => {
   }
 
   try {
-    // Authenticate the user using CouchDB's _session endpoint
+    // Authenticate the user using CouchDB's _session endpoint.
+    // Since this uses our general nano instance, the session will respect the user's AuthSession cookie.
     const session = await nano.auth(username, password);
 
     // Set the AuthSession cookie with httpOnly flag for extra security
