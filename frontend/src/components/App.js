@@ -1,50 +1,82 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './Home';
 import Register from './Register';
 import Login from './Login';
+import Navbar from './Navbar';
+import CreateMaintenance from './CreateMaintenance';
+import UserMaintenances from './UserMaintenances';
 import '../styles/App.css';
 import car from '../assets/images/car.png';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
 function App() {
-  const [view, setView] = useState('home');
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(undefined);
 
-  useEffect(() => {
-    fetch(`${API_URL}/api/auth/protected`, { credentials: 'include' })
-      .then(async (response) => {
-        if (response.ok) {
-          const data = await response.json();
-          if (data.user && data.user.name) {
-            setUser({ username: data.user.name });
-          }
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/auth/protected`, { credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.user && data.user.name) {
+          setUser({ username: data.user.name });
+        } else {
+          setUser(null);
         }
-      })
-      .catch((error) => {
-        console.log("No hay sesión activa", error);
-      });
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      setUser(null);
+    }
   }, []);
 
-  const renderView = () => {
-    switch (view) {
-      case 'register':
-        return <Register setView={setView} />;
-      case 'login':
-        return <Login setView={setView} setUser={setUser} />;
-      default:
-        return <Home setView={setView} user={user} setUser={setUser} />;
-    }
-  };
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={car} className="App-logo" alt="logo" />
-        <p>Welcome to CouchGarage</p>
-        {renderView()}
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Navbar user={user} fetchUser={fetchUser} setUser={setUser} />
+        <Routes>
+          <Route 
+            path="/"
+            element={
+              <div>
+                <header className="App-header">
+                  <img src={car} className="App-logo" alt="logo" />
+                  <p>Welcome to CouchGarage</p>
+                  {user === undefined 
+                    ? <p>Loading...</p>
+                    : <Home user={user} />
+                  }
+                </header>
+              </div>
+            }
+          />
+          <Route path="/login" element={<Login fetchUser={fetchUser} />} />
+          <Route path="/register" element={<Register />} />
+          <Route 
+            path="/maintenances/create" 
+            element={
+              user 
+                ? <CreateMaintenance user={user} />
+                : <Navigate to="/login" replace />
+            } 
+          />
+          <Route 
+            path="/maintenances/mine"
+            element={
+              user 
+                ? <UserMaintenances />
+                : <Navigate to="/login" replace />
+            }
+          />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

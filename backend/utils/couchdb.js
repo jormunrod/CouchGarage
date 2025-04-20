@@ -7,53 +7,7 @@ const couchdbUrl = "http://admin:admin@couchdb:5984";
 const couchdb = nano(couchdbUrl);
 
 const databaseName = "car_maintenances";
-const seedData = [
-  {
-    brand: "Toyota",
-    model: "Corolla",
-    licensePlate: "1234-ABC",
-    maintenanceDate: "2025-04-15",
-    maintenanceType: ["Oil Change", "Brake Check"],
-    cost: 150,
-    comments: "Performed at XYZ Mechanical Workshop",
-  },
-  {
-    brand: "Honda",
-    model: "Civic",
-    licensePlate: "5678-DEF",
-    maintenanceDate: "2025-05-20",
-    maintenanceType: ["Tire Rotation", "Fluid Check"],
-    cost: 100,
-    comments: "Performed at ABC Auto Service",
-  },
-  {
-    brand: "Ford",
-    model: "Focus",
-    licensePlate: "9101-GHI",
-    maintenanceDate: "2025-06-10",
-    maintenanceType: ["Battery Replacement"],
-    cost: 200,
-    comments: "Performed at DEF Garage",
-  },
-  {
-    brand: "Chevrolet",
-    model: "Malibu",
-    licensePlate: "1122-JKL",
-    maintenanceDate: "2025-07-05",
-    maintenanceType: ["Brake Pad Replacement"],
-    cost: 250,
-    comments: "Performed at GHI Auto Repair",
-  },
-  {
-    brand: "Nissan",
-    model: "Altima",
-    licensePlate: "3344-MNO",
-    maintenanceDate: "2025-08-15",
-    maintenanceType: ["Transmission Fluid Change"],
-    cost: 300,
-    comments: "Performed at JKL Service Center",
-  },
-];
+const seedData = require("./seedData");
 
 /**
  * Function to wait for CouchDB availability using the /_up endpoint.
@@ -100,6 +54,8 @@ async function setupDatabase() {
 
     const database = couchdb.use(databaseName);
 
+    
+
     // Check if the database is empty.
     const docs = await database.list({ limit: 1 });
     if (docs.rows.length === 0) {
@@ -110,6 +66,27 @@ async function setupDatabase() {
       console.log("Initial data inserted:", bulkResponse);
     } else {
       console.log(`Database ${databaseName} already contains data.`);
+    }
+
+    try {
+      const designDoc = {
+        _id: '_design/maintenances',
+        views: {
+          by_user: {
+            map: `function(doc) {
+              if (doc.userId) {
+                emit(doc.userId, null);
+              }
+            }`
+          }
+        }
+      };
+      
+      await database.insert(designDoc).catch(e => {
+        if (e.status !== 409) throw e; // Ignorar si ya existe
+      });
+    } catch (error) {
+      console.error('Error creating view:', error);
     }
 
     return database;

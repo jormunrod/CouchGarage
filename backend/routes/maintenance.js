@@ -1,63 +1,70 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const database = require('../utils/couchdb');
+const { getDatabase } = require("../utils/couchdb");
+const axios = require("axios");
 
-// Create a new maintenance
-router.post('/', async (req, res) => {
+// Utilidad para extraer usuario autenticado desde la cookie
+async function getSessionUser(req) {
+  // Extrae la cookie del request y consulta /_session en CouchDB
+  const cookieHeader = req.headers.cookie || "";
+  const sessionRes = await axios.get("http://couchdb:5984/_session", {
+    headers: { Cookie: cookieHeader },
+  });
+  const userCtx = sessionRes.data && sessionRes.data.userCtx;
+  if (userCtx && userCtx.name) return userCtx.name;
+  return null;
+}
+
+// --- Crear mantenimiento ---
+router.post("/", async (req, res) => {
   try {
-    const response = await database.insert(req.body);
-    res.status(201).json(response);
+    const db = await getDatabase();
+
+    // 1. Identificar usuario autenticado desde la sesión
+    const username = await getSessionUser(req);
+    if (!username) {
+      return res.status(401).json({ error: "No autenticado" });
+    }
+
+    // 2. Tomar datos del mantenimiento del body
+    const { carModel, date, description, cost, ...rest } = req.body;
+    const doc = {
+      carModel,
+      date,
+      description,
+      cost: parseFloat(cost),
+      userId: username,
+      createdAt: new Date().toISOString(),
+      ...rest, // aquí van los campos personalizados
+    };
+
+    const response = await db.insert(doc);
+    res.status(201).json({ ok: true, id: response.id, rev: response.rev });
   } catch (error) {
-    console.error('Error creating maintenance:', error);
-    res.status(500).json({ error: 'Error creating maintenance.' });
+    console.error("Error al guardar mantenimiento:", error);
+    res.status(500).json({ error: "Error al guardar mantenimiento." });
   }
 });
 
-// List all maintenances
-router.get('/', async (req, res) => {
+// --- Listar mantenimientos del usuario autenticado ---
+router.get("/mine", async (req, res) => {
   try {
-    const response = await database.view('_all_docs', { include_docs: true });
-    const maintenances = response.rows.map(row => row.doc);
-    res.status(200).json(maintenances);
-  } catch (error) {
-    console.error('Error listing maintenances:', error);
-    res.status(500).json({ error: 'Error listing maintenances.' });
-  }
-});
+    const db = await getDatabase();
+    const username = await getSessionUser(req);
+    if (!username) {
+      return res.status(401).json({ error: "No autenticado" });
+    }
 
-// Get a specific maintenance by ID
-router.get('/:id', async (req, res) => {
-  try {
-    const response = await database.get(req.params.id);
-    res.status(200).json(response);
+    // Usa la view para filtrar por userId
+    const result = await db.view("maintenances", "by_user", {
+      key: username,
+      include_docs: true,
+    });
+    const maintenances = result.rows.map((row) => row.doc);
+    res.json(maintenances);
   } catch (error) {
-    console.error('Error fetching maintenance:', error);
-    res.status(404).json({ error: 'Maintenance not found.' });
-  }
-});
-
-// Update a maintenance
-router.put('/:id', async (req, res) => {
-  try {
-    const doc = await database.get(req.params.id);
-    const updatedDoc = { ...doc, ...req.body };
-    const response = await database.insert(updatedDoc);
-    res.status(200).json(response);
-  } catch (error) {
-    console.error('Error updating maintenance:', error);
-    res.status(500).json({ error: 'Error updating maintenance.' });
-  }
-});
-
-// Delete a maintenance
-router.delete('/:id', async (req, res) => {
-  try {
-    const doc = await database.get(req.params.id);
-    const response = await database.destroy(doc._id, doc._rev);
-    res.status(200).json(response);
-  } catch (error) {
-    console.error('Error deleting maintenance:', error);
-    res.status(500).json({ error: 'Error deleting maintenance.' });
+    console.error("Error al listar mantenimientos:", error);
+    res.status(500).json({ error: "Error al listar mantenimientos." });
   }
 });
 

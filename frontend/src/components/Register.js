@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '../styles/Register.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
-const Register = ({ setView }) => {
+const Register = () => {
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -15,10 +18,9 @@ const Register = ({ setView }) => {
         credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
-
       if (response.ok) {
         alert('Usuario registrado con éxito');
-        setView('login');
+        navigate('/login'); // Ir a la página de login tras registrar
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.error} - ${errorData.details || ''}`);
@@ -29,7 +31,7 @@ const Register = ({ setView }) => {
   };
 
   return (
-    <form onSubmit={handleRegister}>
+    <form onSubmit={handleRegister} className="register-form">
       <h2>Register</h2>
       <input
         type="text"
@@ -37,6 +39,7 @@ const Register = ({ setView }) => {
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         required
+        autoFocus
       />
       <input
         type="password"
@@ -46,7 +49,7 @@ const Register = ({ setView }) => {
         required
       />
       <button type="submit">Register</button>
-      <button type="button" onClick={() => setView('home')}>
+      <button type="button" onClick={() => navigate('/')}>
         Back
       </button>
     </form>

@@ -1,16 +1,37 @@
 const express = require("express");
+const axios = require("axios");
+const nano = require("nano");
+
 // Create a dedicated Nano instance with admin credentials for registration.
-const adminNano = require("nano")(
+const adminNano = nano(
   `http://${process.env.COUCHDB_USER}:${process.env.COUCHDB_PASSWORD}@couchdb:5984`
 );
 // Create a Nano instance without credentials for user session operations.
-const nanoAuth = require("nano")("http://couchdb:5984");
+const nanoAuth = nano("http://couchdb:5984");
 
 const router = express.Router();
 const adminUsersDB = adminNano.use("_users");
 
-// Route to register a new user.
-// Uses the dedicated admin instance to ensure registration always runs with admin privileges.
+// --- UTILS ---
+
+/**
+ * Extracts the value of a cookie from a Set-Cookie header string.
+ * @param {string[]} setCookieArray - Array of Set-Cookie strings.
+ * @param {string} cookieName - Name of the cookie to extract.
+ * @returns {string|null} - Value of the cookie or null if not found.
+ */
+function extractCookieValue(setCookieArray, cookieName) {
+  if (!setCookieArray) return null;
+  const cookieStr = setCookieArray.find((str) =>
+    str.startsWith(`${cookieName}=`)
+  );
+  if (!cookieStr) return null;
+  // Only the value, remove key and up to ;
+  const match = cookieStr.match(new RegExp(`${cookieName}=([^;]+)`));
+  return match ? match[1] : null;
+}
+
+// --- REGISTER ROUTE ---
 router.post("/register", async (req, res) => {
   const { username, password } = req.body;
 
@@ -42,7 +63,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// Route to log in
+// --- LOGIN ROUTE ---
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -53,60 +74,79 @@ router.post("/login", async (req, res) => {
   }
 
   try {
-    // Authenticate the user using CouchDB's _session endpoint.
-    const session = await nanoAuth.auth(username, password);
+    // Manual request to CouchDB _session endpoint for correct cookie
+    const response = await axios.post(
+      "http://couchdb:5984/_session",
+      `name=${encodeURIComponent(username)}&password=${encodeURIComponent(
+        password
+      )}`,
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        withCredentials: true,
+      }
+    );
 
-    // Set the AuthSession cookie with httpOnly flag for extra security and a maxAge for persistence.
-    res.cookie("AuthSession", session.cookie, {
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    });
-    res.status(200).send({ message: "Login successful" });
+    // Extract AuthSession cookie value
+    const cookieValue = extractCookieValue(
+      response.headers["set-cookie"],
+      "AuthSession"
+    );
+
+    if (cookieValue) {
+      // Add SameSite and secure flags as needed for production
+      res.cookie("AuthSession", cookieValue, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: "lax", // or "strict" if your frontend is on the same site
+        // secure: true, // Uncomment if using HTTPS
+        path: "/",
+      });
+      return res.status(200).send({ message: "Login successful" });
+    }
+
+    // No AuthSession cookie found
+    return res.status(401).send({ error: "No AuthSession cookie in response" });
   } catch (error) {
     console.error("Error logging in:", error);
-    if (error.statusCode === 401) {
+    if (error.response && error.response.status === 401) {
       return res.status(401).send({ error: "Invalid credentials" });
     }
-    res
-      .status(500)
-      .send({ error: "Error logging in", details: error.message });
+    res.status(500).send({ error: "Error logging in", details: error.message });
   }
 });
 
-// Protected route as an example
+// --- PROTECTED ROUTE EXAMPLE ---
 router.get("/protected", async (req, res) => {
   try {
-    // Retrieve session information from CouchDB using the request cookie.
-    const sessionInfo = await nanoAuth.session({
-      headers: { Cookie: req.headers.cookie || "" },
-    });
+    console.log('Cookie recibida:', req.headers.cookie);
 
-    if (sessionInfo.userCtx && sessionInfo.userCtx.name) {
-      res
-        .status(200)
-        .send({ message: "Access granted", user: sessionInfo.userCtx });
+    const sessionInfo = await axios.get("http://couchdb:5984/_session", {
+      headers: { Cookie: req.headers.cookie || "" }
+    });
+    console.log('Respuesta de CouchDB /_session:', sessionInfo.data);
+
+    if (sessionInfo.data.userCtx && sessionInfo.data.userCtx.name) {
+      res.status(200).send({ message: "Access granted", user: sessionInfo.data.userCtx });
     } else {
       res.status(401).send({ error: "Invalid session" });
     }
   } catch (error) {
-    console.error("Error validating session:", error);
-    res
-      .status(500)
-      .send({ error: "Error validating session", details: error.message });
+    console.error("Error validating session:", error.response?.data || error.message);
+    res.status(500).send({ error: "Error validating session", details: error.message });
   }
 });
 
-// Route to log out
+// --- LOGOUT ROUTE ---
 router.post("/logout", async (req, res) => {
   try {
-    // Invalidate the session on the CouchDB server side, passing the client's cookie.
+    // Invalidate the session on CouchDB, passing the client's cookie
     await nanoAuth.request({
       method: "DELETE",
       db: "_session",
       headers: { Cookie: req.headers.cookie || "" },
     });
-    // Clear the AuthSession cookie on the client.
-    res.clearCookie("AuthSession");
+    // Clear the AuthSession cookie on the client
+    res.clearCookie("AuthSession", { path: "/" });
     res.status(200).send({ message: "Logout successful" });
   } catch (error) {
     console.error("Error logging out:", error);

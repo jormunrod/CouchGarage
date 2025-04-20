@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import '../styles/Login.css';
+import { useNavigate } from 'react-router-dom';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
-const Login = ({ setView, setUser }) => {
+const Login = ({ fetchUser }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -15,12 +18,9 @@ const Login = ({ setView, setUser }) => {
         credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
-
       if (response.ok) {
-        await response.json();
-        alert('Login successful');
-        setUser({ username });
-        setView('home');
+        await fetchUser();
+        navigate('/');
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.error} - ${errorData.details || ''}`);
@@ -31,7 +31,7 @@ const Login = ({ setView, setUser }) => {
   };
 
   return (
-    <form onSubmit={handleLogin}>
+    <form onSubmit={handleLogin} className="login-form">
       <h2>Login</h2>
       <input
         type="text"
@@ -39,6 +39,7 @@ const Login = ({ setView, setUser }) => {
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         required
+        autoFocus
       />
       <input
         type="password"
@@ -48,7 +49,7 @@ const Login = ({ setView, setUser }) => {
         required
       />
       <button type="submit">Login</button>
-      <button type="button" onClick={() => setView('home')}>
+      <button type="button" onClick={() => navigate('/')}>
         Back
       </button>
     </form>
