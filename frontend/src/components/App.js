@@ -7,7 +7,7 @@ import Navbar from './Navbar';
 import CreateMaintenance from './CreateMaintenance';
 import UserMaintenances from './UserMaintenances';
 import '../styles/App.css';
-import car from '../assets/images/car.png';
+import car from '../assets/images/logo.png';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
