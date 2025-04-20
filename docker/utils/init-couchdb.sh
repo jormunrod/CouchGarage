@@ -36,7 +36,7 @@ for db in _users _replicator _global_changes; do
     fi
     echo "Retrying creation of ${db} in 5 seconds..."
     sleep 5
-    retries=$((retries+1))
+    retries=$((retries + 1))
   done
 done
 

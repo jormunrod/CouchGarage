@@ -50,7 +50,7 @@ TIMEOUT=300
 # Description: Log errors to the log file with a timestamp.
 log_error() {
   echo -e "${RED}Error: $1${NC}" >&2
-  echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >>"$LOG_FILE"
 }
 
 # Function: check_env_file
@@ -102,7 +102,7 @@ wait_for_log() {
 # Description: Start the application containers in production or development mode.
 start_containers() {
   check_env_file
-  
+
   local mode=$1
   if [ "$mode" -eq 1 ]; then
     echo -e "${GREEN}\nStarting application in ${YELLOW}PRODUCTION${NC} mode..."
@@ -120,7 +120,7 @@ start_containers() {
     log_error "Failed to start containers in mode ${mode}."
     return 1
   fi
-  
+
   wait_for_log "$BACKEND_CONTAINER" "Server running at"
 
   if [ "$mode" -eq 2 ]; then
@@ -173,7 +173,7 @@ stop_containers() {
 # Description: Check if Docker and Docker Compose (or docker-compose) are installed.
 check_installation() {
   echo -e "${CYAN}\nChecking installation of Docker and Docker Compose...${NC}"
-  
+
   if command -v docker &>/dev/null; then
     echo -e "${GREEN}Docker is installed.${NC}"
     docker --version
@@ -226,28 +226,28 @@ echo -e "${YELLOW}5)${NC} Display project information"
 read -p "Enter the option number (1, 2, 3, 4 or 5): " option
 
 case $option in
-  1)
-    start_containers 1
-    ;;
-  2)
-    start_containers 2
-    ;;
-  3)
-    stop_containers
-    exit 0
-    ;;
-  4)
-    check_installation
-    ;;
-  5)
-    display_information
-    ;;
-  *)
-    local message="Invalid option. Please use 1, 2, 3, 4 or 5."
-    echo -e "${RED}${message}${NC}"
-    log_error "${message}"
-    exit 1
-    ;;
+1)
+  start_containers 1
+  ;;
+2)
+  start_containers 2
+  ;;
+3)
+  stop_containers
+  exit 0
+  ;;
+4)
+  check_installation
+  ;;
+5)
+  display_information
+  ;;
+*)
+  local message="Invalid option. Please use 1, 2, 3, 4 or 5."
+  echo -e "${RED}${message}${NC}"
+  log_error "${message}"
+  exit 1
+  ;;
 esac
 
 echo ""

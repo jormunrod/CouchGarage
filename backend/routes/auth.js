@@ -118,21 +118,28 @@ router.post("/login", async (req, res) => {
 // --- PROTECTED ROUTE EXAMPLE ---
 router.get("/protected", async (req, res) => {
   try {
-    console.log('Cookie recibida:', req.headers.cookie);
+    console.log("Cookie recibida:", req.headers.cookie);
 
     const sessionInfo = await axios.get("http://couchdb:5984/_session", {
-      headers: { Cookie: req.headers.cookie || "" }
+      headers: { Cookie: req.headers.cookie || "" },
     });
-    console.log('Respuesta de CouchDB /_session:', sessionInfo.data);
+    console.log("Respuesta de CouchDB /_session:", sessionInfo.data);
 
     if (sessionInfo.data.userCtx && sessionInfo.data.userCtx.name) {
-      res.status(200).send({ message: "Access granted", user: sessionInfo.data.userCtx });
+      res
+        .status(200)
+        .send({ message: "Access granted", user: sessionInfo.data.userCtx });
     } else {
       res.status(401).send({ error: "Invalid session" });
     }
   } catch (error) {
-    console.error("Error validating session:", error.response?.data || error.message);
-    res.status(500).send({ error: "Error validating session", details: error.message });
+    console.error(
+      "Error validating session:",
+      error.response?.data || error.message
+    );
+    res
+      .status(500)
+      .send({ error: "Error validating session", details: error.message });
   }
 });
 
