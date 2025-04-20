@@ -31,6 +31,7 @@ const Navbar = ({ user, fetchUser, setUser }) => {
       {user && user.username ? (
         <>
           <Link to="/maintenances/create">Nuevo Mantenimiento</Link>
+          <Link to="/maintenances/mine">Mis Mantenimientos</Link>
           <span className="navbar-user">Hello, {user.username}</span>
           <button onClick={handleLogout}>Logout</button>
         </>

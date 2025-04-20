@@ -5,6 +5,7 @@ import Register from './Register';
 import Login from './Login';
 import Navbar from './Navbar';
 import CreateMaintenance from './CreateMaintenance';
+import UserMaintenances from './UserMaintenances';
 import '../styles/App.css';
 import car from '../assets/images/car.png';
 
@@ -64,6 +65,14 @@ function App() {
                 ? <CreateMaintenance user={user} />
                 : <Navigate to="/login" replace />
             } 
+          />
+          <Route 
+            path="/maintenances/mine"
+            element={
+              user 
+                ? <UserMaintenances />
+                : <Navigate to="/login" replace />
+            }
           />
         </Routes>
       </div>
