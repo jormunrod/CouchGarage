@@ -164,9 +164,13 @@ const UserMaintenances = () => {
 function MaintenanceModal({ maintenance, onClose, onUpdated }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
+  const [customFields, setCustomFields] = useState([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
+
+  // Lista de campos estándar (no personalizados)
+  const STANDARD_FIELDS = ["carModel", "date", "description", "cost"];
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -175,37 +179,72 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
     };
   }, []);
 
+  // Prepara los datos para edición, separando campos personalizados
   useEffect(() => {
     if (editing) {
       const editable = Object.keys(maintenance).filter(
         (key) => !NON_EDITABLE_FIELDS.includes(key)
       );
       const initialForm = {};
+      const initialCustom = [];
       editable.forEach((key) => {
-        initialForm[key] = maintenance[key] ?? "";
+        if (STANDARD_FIELDS.includes(key)) {
+          initialForm[key] = maintenance[key] ?? "";
+        } else {
+          initialCustom.push({ key, value: maintenance[key] ?? "" });
+        }
       });
       setForm(initialForm);
+      setCustomFields(initialCustom);
       setError("");
       setSaving(false);
     }
   }, [editing, maintenance]);
 
+  // Maneja cambios en campos estándar
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
   };
 
+  // Maneja cambios en campos personalizados
+  const handleCustomFieldChange = (idx, field, value) => {
+    setCustomFields((prev) =>
+      prev.map((item, i) =>
+        i === idx ? { ...item, [field]: value } : item
+      )
+    );
+  };
+
+  // Añadir campo personalizado
+  const handleAddField = () => {
+    setCustomFields([...customFields, { key: "", value: "" }]);
+  };
+
+  // Eliminar campo personalizado
+  const handleRemoveField = (idx) => {
+    setCustomFields(customFields.filter((_, i) => i !== idx));
+  };
+
+  // Guardar cambios
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError("");
     const required = ["carModel", "date", "description", "cost"];
+    // Validación de obligatorios
     const missing = required.filter((field) => !form[field]);
     if (missing.length) {
       setError("Por favor, completa todos los campos obligatorios.");
       setSaving(false);
       return;
     }
+    // Montar objeto para el backend
+    const updateObj = { ...form };
+    customFields.forEach(({ key, value }) => {
+      if (key && value) updateObj[key] = value;
+    });
+
     try {
       const response = await fetch(
         `${API_URL}/api/maintenance/${maintenance._id}`,
@@ -213,7 +252,7 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify(form),
+          body: JSON.stringify(updateObj),
         }
       );
       if (response.ok) {
@@ -319,6 +358,7 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
         ) : (
           <form className="mt-modal-editform" onSubmit={handleSubmit}>
             <div className="mt-modal-details">
+              {/* Campos estándar */}
               {Object.keys(form).map((key) => (
                 <div className="mt-modal-detail-row" key={key}>
                   <strong>{FIELD_LABELS[key] || key}:</strong>
@@ -328,12 +368,7 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                       name={key}
                       value={form[key]}
                       onChange={handleChange}
-                      required={[
-                        "carModel",
-                        "date",
-                        "description",
-                        "cost",
-                      ].includes(key)}
+                      required={["carModel", "date", "description", "cost"].includes(key)}
                     />
                   ) : key === "cost" ? (
                     <>
@@ -345,8 +380,7 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                         min="0"
                         step="0.01"
                         required
-                      />{" "}
-                      €
+                      /> €
                     </>
                   ) : (
                     <input
@@ -354,16 +388,56 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                       name={key}
                       value={form[key]}
                       onChange={handleChange}
-                      required={[
-                        "carModel",
-                        "date",
-                        "description",
-                        "cost",
-                      ].includes(key)}
+                      required={["carModel", "date", "description", "cost"].includes(key)}
                     />
                   )}
                 </div>
               ))}
+        
+              {/* Campos personalizados */}
+              <div className="custom-fields-section">
+                <div className="custom-fields-header">
+                  <h4>Campos personalizados</h4>
+                  <button
+                    type="button"
+                    className="add-field-btn"
+                    onClick={handleAddField}
+                    title="Agregar campo personalizado"
+                  >
+                    <span className="icon">➕</span> Agregar campo
+                  </button>
+                </div>
+                {customFields.length === 0 && (
+                  <div className="custom-fields-empty">
+                    Agrega información personalizada como <b>kilometraje</b>, <b>taller</b>, etc.
+                  </div>
+                )}
+                {customFields.map((item, idx) => (
+                  <div key={idx} className="custom-field-row">
+                    <input
+                      type="text"
+                      placeholder="Nombre del campo (ej: kilometraje)"
+                      value={item.key}
+                      onChange={e => handleCustomFieldChange(idx, "key", e.target.value)}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Valor (ej: 123456)"
+                      value={item.value}
+                      onChange={e => handleCustomFieldChange(idx, "value", e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="remove-field-btn"
+                      title="Eliminar campo"
+                      aria-label="Eliminar campo"
+                      onClick={() => handleRemoveField(idx)}
+                    >
+                      <span className="icon">🗑️</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
             {error && <div className="mt-modal-error">{error}</div>}
             <div className="mt-modal-actions">
