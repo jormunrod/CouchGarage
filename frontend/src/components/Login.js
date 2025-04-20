@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
-const Login = ({ setView, setUser }) => {
+const Login = ({ setView, fetchUser }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -17,9 +17,9 @@ const Login = ({ setView, setUser }) => {
       });
 
       if (response.ok) {
-        await response.json();
+        // Espera a que se refresque el usuario
+        await fetchUser();
         alert('Login successful');
-        setUser({ username });
         setView('home');
       } else {
         const errorData = await response.json();

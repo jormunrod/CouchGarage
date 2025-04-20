@@ -1,12 +1,12 @@
 import React from 'react';
 import LogoutButton from './LogoutButton';
 
-const Home = ({ setView, user, setUser }) => (
+const Home = ({ setView, user, setUser, fetchUser }) => (
   <div>
     {user ? (
       <>
         <p>Hello, {user.username}. You are logged in!</p>
-        <LogoutButton setUser={setUser} setView={setView} />
+        <LogoutButton setUser={setUser} setView={setView} fetchUser={fetchUser} />
       </>
     ) : (
       <>

@@ -2,7 +2,7 @@ import React from 'react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
-const LogoutButton = ({ setUser, setView }) => {
+const LogoutButton = ({ setUser, setView, fetchUser }) => {
   const handleLogout = async () => {
     try {
       const response = await fetch(`${API_URL}/api/auth/logout`, {
@@ -11,7 +11,7 @@ const LogoutButton = ({ setUser, setView }) => {
       });
       if (response.ok) {
         alert("Logout successful");
-        setUser(null);
+        await fetchUser();
         setView("home");
       } else {
         const errorData = await response.json();
