@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import car from '../assets/images/logo.png';
-import '../styles/Home.css';
+import React from "react";
+import { Link } from "react-router-dom";
+import car from "../assets/images/logo.png";
+import "../styles/Home.css";
 
 const Home = ({ user }) => (
   <div className="home-fullpage-bg">
@@ -9,7 +9,8 @@ const Home = ({ user }) => (
       <img src={car} className="home-logo" alt="logo" />
       <h1 className="home-title">CouchGarage</h1>
       <p className="home-subtitle">
-        Organiza y lleva el control de tus mantenimientos de coche, fácil y rápido.
+        Organiza y lleva el control de tus mantenimientos de coche, fácil y
+        rápido.
       </p>
       {user ? (
         <div className="home-actions">

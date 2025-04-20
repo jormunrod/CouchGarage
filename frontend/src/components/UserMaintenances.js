@@ -35,11 +35,7 @@ const UserMaintenances = () => {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [refresh, setRefresh] = useState(false);
-
-  // Mensajes globales de éxito/error
   const [message, setMessage] = useState(null);
-
-  // Paginación
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -59,7 +55,10 @@ const UserMaintenances = () => {
         }
       } catch (error) {
         setMaintenances([]);
-        setMessage({ type: "error", text: "Error de red cargando mantenimientos" });
+        setMessage({
+          type: "error",
+          text: "Error de red cargando mantenimientos",
+        });
       }
       setLoading(false);
     };
@@ -68,12 +67,10 @@ const UserMaintenances = () => {
 
   const handleUpdate = (msg) => {
     setSelected(null);
-    setRefresh((r) => !r); // Fuerza recarga de mantenimientos
-    // Si recibimos un mensaje (de éxito, borrado, etc), lo mostramos
+    setRefresh((r) => !r);
     if (msg) setMessage(msg);
   };
 
-  // Lógica de paginación (falsa, todo en frontend)
   const totalPages = Math.max(
     1,
     Math.ceil(maintenances.length / ITEMS_PER_PAGE)
@@ -184,7 +181,6 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Lista de campos estándar (no personalizados)
   const STANDARD_FIELDS = ["carModel", "date", "description", "cost"];
 
   useEffect(() => {
@@ -194,7 +190,6 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
     };
   }, []);
 
-  // Prepara los datos para edición, separando campos personalizados
   useEffect(() => {
     if (editing) {
       const editable = Object.keys(maintenance).filter(
@@ -223,40 +218,32 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
     setForm((f) => ({ ...f, [name]: value }));
   };
 
-  // Maneja cambios en campos personalizados
   const handleCustomFieldChange = (idx, field, value) => {
     setCustomFields((prev) =>
-      prev.map((item, i) =>
-        i === idx ? { ...item, [field]: value } : item
-      )
+      prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item))
     );
   };
 
-  // Añadir campo personalizado
   const handleAddField = () => {
     setCustomFields([...customFields, { key: "", value: "" }]);
   };
 
-  // Eliminar campo personalizado
   const handleRemoveField = (idx) => {
     setCustomFields(customFields.filter((_, i) => i !== idx));
   };
 
-  // Guardar cambios
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError("");
     setSuccess("");
     const required = ["carModel", "date", "description", "cost"];
-    // Validación de obligatorios
     const missing = required.filter((field) => !form[field]);
     if (missing.length) {
       setError("Por favor, completa todos los campos obligatorios.");
       setSaving(false);
       return;
     }
-    // Montar objeto para el backend
     const updateObj = { ...form };
     customFields.forEach(({ key, value }) => {
       if (key && value) updateObj[key] = value;
@@ -286,11 +273,9 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
     setSaving(false);
   };
 
-  // Confirmación personalizada para eliminar
   const handleDeleteClick = () => setShowDeleteConfirm(true);
   const handleDeleteCancel = () => setShowDeleteConfirm(false);
 
-  // Eliminar definitivamente
   const handleDelete = async () => {
     setDeleting(true);
     setError("");
@@ -362,17 +347,40 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                 );
               })}
             </div>
-            {error && <Message type="error" onClose={() => setError("")}>{error}</Message>}
-            {success && <Message type="success" onClose={() => setSuccess("")}>{success}</Message>}
+            {error && (
+              <Message type="error" onClose={() => setError("")}>
+                {error}
+              </Message>
+            )}
+            {success && (
+              <Message type="success" onClose={() => setSuccess("")}>
+                {success}
+              </Message>
+            )}
             {showDeleteConfirm ? (
               <div className="mt-modal-delete-confirm">
                 <Message type="error" onClose={handleDeleteCancel}>
                   ¿Seguro que deseas eliminar este mantenimiento?
-                  <div style={{ marginTop: 12, display: "flex", gap: "1rem", justifyContent: "center" }}>
-                    <button className="mt-modal-delete" onClick={handleDelete} disabled={deleting}>
+                  <div
+                    style={{
+                      marginTop: 12,
+                      display: "flex",
+                      gap: "1rem",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <button
+                      className="mt-modal-delete"
+                      onClick={handleDelete}
+                      disabled={deleting}
+                    >
                       {deleting ? "Eliminando..." : "Sí, eliminar"}
                     </button>
-                    <button className="mt-modal-edit" onClick={handleDeleteCancel} disabled={deleting}>
+                    <button
+                      className="mt-modal-edit"
+                      onClick={handleDeleteCancel}
+                      disabled={deleting}
+                    >
                       Cancelar
                     </button>
                   </div>
@@ -399,7 +407,7 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
         ) : (
           <form className="mt-modal-editform" onSubmit={handleSubmit}>
             <div className="mt-modal-details">
-              {/* Campos estándar */}
+              {/* Standar Fields */}
               {Object.keys(form).map((key) => (
                 <div className="mt-modal-detail-row" key={key}>
                   <strong>{FIELD_LABELS[key] || key}:</strong>
@@ -409,7 +417,12 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                       name={key}
                       value={form[key]}
                       onChange={handleChange}
-                      required={["carModel", "date", "description", "cost"].includes(key)}
+                      required={[
+                        "carModel",
+                        "date",
+                        "description",
+                        "cost",
+                      ].includes(key)}
                     />
                   ) : key === "cost" ? (
                     <>
@@ -421,7 +434,8 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                         min="0"
                         step="0.01"
                         required
-                      /> €
+                      />{" "}
+                      €
                     </>
                   ) : (
                     <input
@@ -429,13 +443,18 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                       name={key}
                       value={form[key]}
                       onChange={handleChange}
-                      required={["carModel", "date", "description", "cost"].includes(key)}
+                      required={[
+                        "carModel",
+                        "date",
+                        "description",
+                        "cost",
+                      ].includes(key)}
                     />
                   )}
                 </div>
               ))}
 
-              {/* Campos personalizados */}
+              {/* Personalized Fields */}
               <div className="custom-fields-section">
                 <div className="custom-fields-header">
                   <h4>Campos personalizados</h4>
@@ -450,7 +469,8 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                 </div>
                 {customFields.length === 0 && (
                   <div className="custom-fields-empty">
-                    Agrega información personalizada como <b>kilometraje</b>, <b>taller</b>, etc.
+                    Agrega información personalizada como <b>kilometraje</b>,{" "}
+                    <b>taller</b>, etc.
                   </div>
                 )}
                 {customFields.map((item, idx) => (
@@ -459,13 +479,17 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                       type="text"
                       placeholder="Nombre del campo (ej: kilometraje)"
                       value={item.key}
-                      onChange={e => handleCustomFieldChange(idx, "key", e.target.value)}
+                      onChange={(e) =>
+                        handleCustomFieldChange(idx, "key", e.target.value)
+                      }
                     />
                     <input
                       type="text"
                       placeholder="Valor (ej: 123456)"
                       value={item.value}
-                      onChange={e => handleCustomFieldChange(idx, "value", e.target.value)}
+                      onChange={(e) =>
+                        handleCustomFieldChange(idx, "value", e.target.value)
+                      }
                     />
                     <button
                       type="button"
@@ -480,8 +504,16 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                 ))}
               </div>
             </div>
-            {error && <Message type="error" onClose={() => setError("")}>{error}</Message>}
-            {success && <Message type="success" onClose={() => setSuccess("")}>{success}</Message>}
+            {error && (
+              <Message type="error" onClose={() => setError("")}>
+                {error}
+              </Message>
+            )}
+            {success && (
+              <Message type="success" onClose={() => setSuccess("")}>
+                {success}
+              </Message>
+            )}
             <div className="mt-modal-actions">
               <button type="submit" className="mt-modal-edit" disabled={saving}>
                 {saving ? "Guardando..." : "Guardar"}

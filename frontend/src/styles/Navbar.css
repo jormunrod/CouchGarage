@@ -1,5 +1,5 @@
 .navbar {
-  background: rgba(24,28,34,0.97);
+  background: rgba(24, 28, 34, 0.97);
   color: #fff;
   padding: 0.6rem 2vw;
   display: flex;
@@ -10,7 +10,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  font-family: "Segoe UI", "Roboto", Arial, sans-serif;
 }
 
 .navbar-logo-area {

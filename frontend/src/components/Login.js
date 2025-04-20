@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import '../styles/Login.css';
-import { useNavigate } from 'react-router-dom';
-import Message from '../components/Message';
+import React, { useState } from "react";
+import "../styles/Login.css";
+import { useNavigate } from "react-router-dom";
+import Message from "../components/Message";
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
 const Login = ({ fetchUser }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState(null); // { type: "success"|"error"|"info", text: "" }
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState(null);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -16,18 +16,24 @@ const Login = ({ fetchUser }) => {
     setMessage(null);
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ username, password }),
       });
       if (response.ok) {
-        setMessage({ type: "success", text: "Inicio de sesión correcto. Redirigiendo..." });
+        setMessage({
+          type: "success",
+          text: "Inicio de sesión correcto. Redirigiendo...",
+        });
         await fetchUser();
-        setTimeout(() => navigate('/'), 700);
+        setTimeout(() => navigate("/"), 700);
       } else {
         const errorData = await response.json();
-        setMessage({ type: "error", text: `Error: ${errorData.error} - ${errorData.details || ''}` });
+        setMessage({
+          type: "error",
+          text: `Error: ${errorData.error} - ${errorData.details || ""}`,
+        });
       }
     } catch (error) {
       setMessage({ type: "error", text: "Error al iniciar sesión" });
@@ -59,7 +65,7 @@ const Login = ({ fetchUser }) => {
           required
         />
         <button type="submit">Iniciar sesión</button>
-        <button type="button" onClick={() => navigate('/')}>
+        <button type="button" onClick={() => navigate("/")}>
           Volver
         </button>
         <p>

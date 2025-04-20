@@ -1,9 +1,9 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import car from '../assets/images/logo.png';
-import '../styles/Navbar.css';
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import car from "../assets/images/logo.png";
+import "../styles/Navbar.css";
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
 const Navbar = ({ user, fetchUser, setUser }) => {
   const navigate = useNavigate();
@@ -12,14 +12,14 @@ const Navbar = ({ user, fetchUser, setUser }) => {
     try {
       const response = await fetch(`${API_URL}/api/auth/logout`, {
         method: "POST",
-        credentials: "include"
+        credentials: "include",
       });
       if (response.ok) {
         await fetchUser();
         navigate("/");
       } else {
         const errorData = await response.json();
-        alert(`Error: ${errorData.error} - ${errorData.details || ''}`);
+        alert(`Error: ${errorData.error} - ${errorData.details || ""}`);
       }
     } catch (error) {
       alert("Error al cerrar sesión");
@@ -50,7 +50,9 @@ const Navbar = ({ user, fetchUser, setUser }) => {
         {user && user.username ? (
           <>
             <span className="navbar-user">Hola, {user.username}</span>
-            <button className="navbar-logout-btn" onClick={handleLogout}>Cerrar sesión</button>
+            <button className="navbar-logout-btn" onClick={handleLogout}>
+              Cerrar sesión
+            </button>
           </>
         ) : null}
       </div>

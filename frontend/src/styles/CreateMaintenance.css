@@ -12,7 +12,7 @@
   background: rgba(24, 28, 34, 0.98);
   padding: 2.6rem 2.1rem 2rem 2.1rem;
   border-radius: 18px;
-  box-shadow: 0 9px 48px 0 rgba(0,0,0,0.45);
+  box-shadow: 0 9px 48px 0 rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -149,8 +149,14 @@
   width: 100%;
 }
 @keyframes fadein {
-  from { opacity: 0; transform: translateY(12px);}
-  to   { opacity: 1; transform: none;}
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .custom-field-row input[type="text"] {
@@ -197,7 +203,7 @@
 }
 
 .main-btn {
-  background: linear-gradient(90deg,#47b1f6 80%,#3194cf 120%);
+  background: linear-gradient(90deg, #47b1f6 80%, #3194cf 120%);
   color: #fff;
   border: none;
   padding: 0.92rem 0;
@@ -267,7 +273,9 @@
   margin-right: 0.5em;
 }
 @keyframes spin {
-  to { transform: rotate(360deg);}
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 520px) {
@@ -282,7 +290,8 @@
     flex-direction: column;
     gap: 0.5em;
   }
-  .main-btn, .secondary-btn {
+  .main-btn,
+  .secondary-btn {
     font-size: 1.04rem;
     padding: 0.85rem 0;
   }

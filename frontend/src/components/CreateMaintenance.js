@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../styles/CreateMaintenance.css";
-import { useNavigate } from 'react-router-dom';
-import Message from '../components/Message';
+import { useNavigate } from "react-router-dom";
+import Message from "../components/Message";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
@@ -12,7 +12,7 @@ const CreateMaintenance = () => {
   const [cost, setCost] = useState("");
   const [customFields, setCustomFields] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(null); // { type, text }
+  const [message, setMessage] = useState(null);
   const navigate = useNavigate();
 
   const handleAddField = () => {
@@ -55,14 +55,23 @@ const CreateMaintenance = () => {
         body: JSON.stringify(maintenanceData),
       });
       if (response.ok) {
-        setMessage({ type: "success", text: "¡Mantenimiento guardado! Redirigiendo..." });
-        setTimeout(() => navigate('/'), 1200);
+        setMessage({
+          type: "success",
+          text: "¡Mantenimiento guardado! Redirigiendo...",
+        });
+        setTimeout(() => navigate("/"), 1200);
       } else {
         const data = await response.json();
-        setMessage({ type: "error", text: "Error al guardar: " + (data.error || "Desconocido") });
+        setMessage({
+          type: "error",
+          text: "Error al guardar: " + (data.error || "Desconocido"),
+        });
       }
     } catch (error) {
-      setMessage({ type: "error", text: "Error de red al guardar mantenimiento" });
+      setMessage({
+        type: "error",
+        text: "Error de red al guardar mantenimiento",
+      });
     } finally {
       setLoading(false);
     }
@@ -72,7 +81,10 @@ const CreateMaintenance = () => {
     <div className="create-mt-fullpage-bg">
       <form className="create-maintenance-form" onSubmit={handleSubmit}>
         <h2>
-          <span role="img" aria-label="tools">🛠️</span> Nuevo Mantenimiento
+          <span role="img" aria-label="tools">
+            🛠️
+          </span>{" "}
+          Nuevo Mantenimiento
         </h2>
         {message && (
           <Message type={message.type} onClose={() => setMessage(null)}>
@@ -88,7 +100,7 @@ const CreateMaintenance = () => {
               id="carModel"
               type="text"
               value={carModel}
-              onChange={e => setCarModel(e.target.value)}
+              onChange={(e) => setCarModel(e.target.value)}
               required
               autoComplete="off"
               placeholder="Ej: Toyota Corolla"
@@ -102,7 +114,7 @@ const CreateMaintenance = () => {
               id="date"
               type="date"
               value={date}
-              onChange={e => setDate(e.target.value)}
+              onChange={(e) => setDate(e.target.value)}
               required
             />
           </div>
@@ -113,7 +125,7 @@ const CreateMaintenance = () => {
             <textarea
               id="description"
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value)}
               required
               rows={3}
               placeholder="Describe el mantenimiento realizado"
@@ -129,7 +141,7 @@ const CreateMaintenance = () => {
               value={cost}
               min="0"
               step="0.01"
-              onChange={e => setCost(e.target.value)}
+              onChange={(e) => setCost(e.target.value)}
               required
               placeholder="Ej: 200"
             />
@@ -149,7 +161,8 @@ const CreateMaintenance = () => {
           </div>
           {customFields.length === 0 && (
             <div className="custom-fields-empty">
-              Agrega información personalizada como <b>kilometraje</b>, <b>taller</b>, etc.
+              Agrega información personalizada como <b>kilometraje</b>,{" "}
+              <b>taller</b>, etc.
             </div>
           )}
           {customFields.map((item, idx) => (
@@ -158,13 +171,17 @@ const CreateMaintenance = () => {
                 type="text"
                 placeholder="Nombre del campo (ej: kilometraje)"
                 value={item.key}
-                onChange={e => handleCustomFieldChange(idx, "key", e.target.value)}
+                onChange={(e) =>
+                  handleCustomFieldChange(idx, "key", e.target.value)
+                }
               />
               <input
                 type="text"
                 placeholder="Valor (ej: 123456)"
                 value={item.value}
-                onChange={e => handleCustomFieldChange(idx, "value", e.target.value)}
+                onChange={(e) =>
+                  handleCustomFieldChange(idx, "value", e.target.value)
+                }
               />
               <button
                 type="button"
@@ -193,7 +210,7 @@ const CreateMaintenance = () => {
           <button
             type="button"
             className="secondary-btn"
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             disabled={loading}
           >
             <span className="icon">←</span> Volver
