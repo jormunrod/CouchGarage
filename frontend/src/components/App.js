@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./Home";
 import Register from "./Register";
 import Login from "./Login";
@@ -12,8 +7,6 @@ import Navbar from "./Navbar";
 import CreateMaintenance from "./CreateMaintenance";
 import UserMaintenances from "./UserMaintenances";
 import RequireAuth from "./RequireAuth";
-import "../styles/App.css";
-import car from "../assets/images/logo.png";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
@@ -46,23 +39,19 @@ function App() {
 
   return (
     <Router>
-      <div className="App">
+      <div>
         <Navbar user={user} fetchUser={fetchUser} setUser={setUser} />
         <Routes>
           <Route
             path="/"
             element={
-              <div>
-                <header className="App-header">
-                  <img src={car} className="App-logo" alt="logo" />
-                  <p>Bienvenido a CouchGarage</p>
-                  {user === undefined ? (
-                    <p>Cargando...</p>
-                  ) : (
-                    <Home user={user} />
-                  )}
-                </header>
-              </div>
+              user === undefined ? (
+                <div className="App-header">
+                  <p>Cargando...</p>
+                </div>
+              ) : (
+                <Home user={user} />
+              )
             }
           />
           <Route path="/login" element={<Login fetchUser={fetchUser} />} />

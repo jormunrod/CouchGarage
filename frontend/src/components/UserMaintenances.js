@@ -30,7 +30,7 @@ const UserMaintenances = () => {
 
   return (
     <div className="user-mt-fullpage-bg">
-      <div className="user-mt-container">
+      <div className="user-mt-card">
         <h2>Mis Mantenimientos</h2>
         {loading ? (
           <div className="user-mt-loading">Cargando mantenimientos...</div>
@@ -39,15 +39,25 @@ const UserMaintenances = () => {
         ) : (
           <div className="user-mt-list">
             {maintenances.map((item) => (
-              <div key={item._id} className="user-mt-card">
-                <div><strong>Modelo:</strong> {item.carModel}</div>
-                <div><strong>Fecha:</strong> {item.date}</div>
-                <div><strong>Descripción:</strong> {item.description}</div>
-                <div><strong>Coste:</strong> {item.cost} €</div>
+              <div key={item._id} className="user-mt-maint-card">
+                <div>
+                  <strong>Modelo:</strong> <span>{item.carModel}</span>
+                </div>
+                <div>
+                  <strong>Fecha:</strong> <span>{item.date}</span>
+                </div>
+                <div>
+                  <strong>Descripción:</strong> <span>{item.description}</span>
+                </div>
+                <div>
+                  <strong>Coste:</strong> <span>{item.cost} €</span>
+                </div>
                 {/* Mostrar campos personalizados */}
                 {Object.entries(item).map(([key, value]) =>
                   !["carModel", "date", "description", "cost", "userId", "createdAt", "_id", "_rev"].includes(key) ? (
-                    <div key={key}><strong>{key}:</strong> {value}</div>
+                    <div key={key}>
+                      <strong>{key}:</strong> <span>{value}</span>
+                    </div>
                   ) : null
                 )}
                 <div className="user-mt-date">
