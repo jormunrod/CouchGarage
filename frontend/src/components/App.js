@@ -47,9 +47,9 @@ function App() {
               <div>
                 <header className="App-header">
                   <img src={car} className="App-logo" alt="logo" />
-                  <p>Welcome to CouchGarage</p>
+                  <p>Bienvenido a CouchGarage</p>
                   {user === undefined 
-                    ? <p>Loading...</p>
+                    ? <p>Cargando...</p>
                     : <Home user={user} />
                   }
                 </header>

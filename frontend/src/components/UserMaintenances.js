@@ -28,30 +28,35 @@ const UserMaintenances = () => {
     fetchMaintenances();
   }, []);
 
-  if (loading) return <div className="user-mt-loading">Cargando mantenimientos...</div>;
-  if (!maintenances.length) return <div className="user-mt-empty">No hay mantenimientos registrados.</div>;
-
   return (
-    <div className="user-mt-container">
-      <h2>Mis Mantenimientos</h2>
-      <div className="user-mt-list">
-        {maintenances.map((item) => (
-          <div key={item._id} className="user-mt-card">
-            <div><strong>Modelo:</strong> {item.carModel}</div>
-            <div><strong>Fecha:</strong> {item.date}</div>
-            <div><strong>Descripción:</strong> {item.description}</div>
-            <div><strong>Coste:</strong> {item.cost} €</div>
-            {/* Mostrar campos personalizados */}
-            {Object.entries(item).map(([key, value]) =>
-              !["carModel", "date", "description", "cost", "userId", "createdAt", "_id", "_rev"].includes(key) ? (
-                <div key={key}><strong>{key}:</strong> {value}</div>
-              ) : null
-            )}
-            <div className="user-mt-date">
-              <em>Creado: {new Date(item.createdAt).toLocaleString()}</em>
-            </div>
+    <div className="user-mt-fullpage-bg">
+      <div className="user-mt-container">
+        <h2>Mis Mantenimientos</h2>
+        {loading ? (
+          <div className="user-mt-loading">Cargando mantenimientos...</div>
+        ) : !maintenances.length ? (
+          <div className="user-mt-empty">No hay mantenimientos registrados.</div>
+        ) : (
+          <div className="user-mt-list">
+            {maintenances.map((item) => (
+              <div key={item._id} className="user-mt-card">
+                <div><strong>Modelo:</strong> {item.carModel}</div>
+                <div><strong>Fecha:</strong> {item.date}</div>
+                <div><strong>Descripción:</strong> {item.description}</div>
+                <div><strong>Coste:</strong> {item.cost} €</div>
+                {/* Mostrar campos personalizados */}
+                {Object.entries(item).map(([key, value]) =>
+                  !["carModel", "date", "description", "cost", "userId", "createdAt", "_id", "_rev"].includes(key) ? (
+                    <div key={key}><strong>{key}:</strong> {value}</div>
+                  ) : null
+                )}
+                <div className="user-mt-date">
+                  <em>Creado: {new Date(item.createdAt).toLocaleString()}</em>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

@@ -1,62 +1,299 @@
+.create-mt-fullpage-bg {
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(120deg, #222935 55%, #47b1f6 120%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.4rem 0.6rem;
+}
+
 .create-maintenance-form {
-  background: #23272f;
-  padding: 2rem 2.5rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+  background: rgba(24, 28, 34, 0.98);
+  padding: 2.6rem 2.1rem 2rem 2.1rem;
+  border-radius: 18px;
+  box-shadow: 0 9px 48px 0 rgba(0,0,0,0.45);
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  width: 350px;
-  margin: 2rem auto;
+  width: 100%;
+  max-width: 430px;
+  animation: pop-fadein 0.5s;
+}
+
+@keyframes pop-fadein {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .create-maintenance-form h2 {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.2rem;
   color: #fff;
   text-align: center;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.65rem;
+  letter-spacing: 0.6px;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  justify-content: center;
 }
 
-.create-maintenance-form label {
-  color: #dedede;
-  font-size: 1rem;
-  margin-bottom: 0.4rem;
-  margin-top: 0.6rem;
+.inputs-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.08rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  color: #9fcfff;
+  font-size: 1.04rem;
+  margin-bottom: 0.29rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  display: flex;
+  align-items: center;
+  gap: 0.42em;
+}
+
+.input-group .icon {
+  font-size: 1.14em;
 }
 
 .create-maintenance-form input,
 .create-maintenance-form textarea {
-  padding: 0.7rem 1rem;
-  margin-bottom: 1.1rem;
-  border: 1px solid #444;
+  padding: 0.85rem 1.05rem;
+  border: 1.6px solid #394052;
+  border-radius: 7px;
+  background: #181c22;
+  color: #f5f7fa;
+  font-size: 1.08rem;
+  margin-bottom: 0;
+  resize: none;
+  transition: border 0.22s;
+  outline: none;
+  font-family: inherit;
+}
+.create-maintenance-form input:focus,
+.create-maintenance-form textarea:focus {
+  border: 1.6px solid #47b1f6;
+}
+
+.custom-fields-section {
+  background: #232a36;
+  border-radius: 9px;
+  padding: 1.1rem;
+  margin-bottom: 1.25rem;
+  margin-top: 1rem;
+  box-shadow: 0 2px 10px #0002;
+  transition: box-shadow 0.2s;
+}
+
+.custom-fields-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.custom-fields-header h4 {
+  color: #b5d9ff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.add-field-btn {
+  background: #3194cf;
+  color: #fff;
+  border: none;
+  padding: 0.38rem 0.9rem;
   border-radius: 6px;
+  font-size: 1.04rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+  transition: background 0.16s;
+}
+.add-field-btn:hover {
+  background: #47b1f6;
+}
+
+.custom-fields-empty {
+  color: #a1b6ca;
+  font-size: 0.98rem;
+  margin-bottom: 0.6rem;
+  text-align: center;
+  opacity: 0.92;
+}
+
+.custom-field-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 0.6rem;
+  align-items: center;
+  animation: fadein 0.28s;
+  width: 100%;
+}
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(12px);}
+  to   { opacity: 1; transform: none;}
+}
+
+.custom-field-row input[type="text"] {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 5px;
+  border: 1.1px solid #394052;
   background: #181c22;
   color: #fff;
   font-size: 1rem;
-  resize: none;
-  transition: border 0.2s;
-}
-
-.create-maintenance-form input:focus,
-.create-maintenance-form textarea:focus {
-  border: 1.5px solid #47b1f6;
   outline: none;
+  box-sizing: border-box;
+}
+.custom-field-row input[type="text"]:focus {
+  border: 1.2px solid #47b1f6;
 }
 
-.create-maintenance-form button {
-  background: #47b1f6;
+.remove-field-btn {
+  background: #e74c3c;
   color: #fff;
   border: none;
-  padding: 0.7rem 0;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 1rem;
+  border-radius: 5px;
+  font-size: 1.13rem;
+  width: 34px;
+  height: 34px;
   cursor: pointer;
-  margin-bottom: 10px;
-  margin-top: 4px;
-  transition: background 0.2s;
+  margin-left: 3px;
+  transition: background 0.15s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.remove-field-btn:hover {
+  background: #c0392b;
+  transform: scale(1.07);
 }
 
-.create-maintenance-form button:hover {
+.form-btns-row {
+  display: flex;
+  gap: 0.8em;
+  margin-top: 0.6em;
+}
+
+.main-btn {
+  background: linear-gradient(90deg,#47b1f6 80%,#3194cf 120%);
+  color: #fff;
+  border: none;
+  padding: 0.92rem 0;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.13rem;
+  cursor: pointer;
+  flex: 1;
+  transition: background 0.2s, transform 0.12s;
+  letter-spacing: 0.22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  box-shadow: 0 2px 10px #47b1f644;
+}
+.main-btn:disabled {
+  background: #6daee8;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+.main-btn:hover:not(:disabled) {
   background: #3194cf;
+  transform: scale(1.03);
+}
+
+.secondary-btn {
+  background: #222b38;
+  color: #adcefa;
+  border: none;
+  padding: 0.85rem 0;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.03rem;
+  cursor: pointer;
+  flex: 0.65;
+  transition: background 0.18s, color 0.18s, transform 0.1s;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45em;
+}
+.secondary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.secondary-btn:hover:not(:disabled) {
+  background: #253245;
+  color: #fff;
+  transform: scale(1.03);
+}
+
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.loader {
+  border: 3px solid #eeeeee44;
+  border-top: 3px solid #47b1f6;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  animation: spin 0.9s linear infinite;
+  display: inline-block;
+  margin-right: 0.5em;
+}
+@keyframes spin {
+  to { transform: rotate(360deg);}
+}
+
+@media (max-width: 520px) {
+  .create-maintenance-form {
+    padding: 1.1rem 0.5rem 1rem 0.5rem;
+    max-width: 98vw;
+  }
+  .custom-fields-section {
+    padding: 0.8rem;
+  }
+  .form-btns-row {
+    flex-direction: column;
+    gap: 0.5em;
+  }
+  .main-btn, .secondary-btn {
+    font-size: 1.04rem;
+    padding: 0.85rem 0;
+  }
+  .custom-field-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 5px;
+  }
+  .remove-field-btn {
+    align-self: flex-end;
+    margin-top: 4px;
+    margin-left: 0;
+  }
 }

@@ -9,7 +9,7 @@ const CreateMaintenance = () => {
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
   const [cost, setCost] = useState("");
-  const [customFields, setCustomFields] = useState([]); // [{key: '', value: ''}]
+  const [customFields, setCustomFields] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -24,18 +24,20 @@ const CreateMaintenance = () => {
     setCustomFields(updated);
   };
 
+  const handleRemoveField = (idx) => {
+    setCustomFields(customFields.filter((_, i) => i !== idx));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Construir el objeto con los campos estándar
     const maintenanceData = {
       carModel,
       date,
       description,
       cost,
     };
-    // Agregar los campos personalizados (clave: valor)
     customFields.forEach(({ key, value }) => {
       if (key && value) {
         maintenanceData[key] = value;
@@ -64,71 +66,133 @@ const CreateMaintenance = () => {
   };
 
   return (
-    <form className="create-maintenance-form" onSubmit={handleSubmit}>
-      <h2>Nuevo Mantenimiento</h2>
-      <label>
-        Modelo de coche:
-        <input
-          type="text"
-          value={carModel}
-          onChange={e => setCarModel(e.target.value)}
-          required
-        />
-      </label>
-      <label>
-        Fecha:
-        <input
-          type="date"
-          value={date}
-          onChange={e => setDate(e.target.value)}
-          required
-        />
-      </label>
-      <label>
-        Descripción:
-        <textarea
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          required
-          rows={3}
-        />
-      </label>
-      <label>
-        Coste (€):
-        <input
-          type="number"
-          value={cost}
-          min="0"
-          step="0.01"
-          onChange={e => setCost(e.target.value)}
-          required
-        />
-      </label>
-      <div>
-        <h4>Campos personalizados</h4>
-        {customFields.map((item, idx) => (
-          <div key={idx} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+    <div className="create-mt-fullpage-bg">
+      <form className="create-maintenance-form" onSubmit={handleSubmit}>
+        <h2>
+          <span role="img" aria-label="tools">🛠️</span> Nuevo Mantenimiento
+        </h2>
+        <div className="inputs-wrapper">
+          <div className="input-group">
+            <label htmlFor="carModel">
+              <span className="icon">🚗</span> Modelo de coche
+            </label>
             <input
+              id="carModel"
               type="text"
-              placeholder="Nombre del campo (ej: color)"
-              value={item.key}
-              onChange={e => handleCustomFieldChange(idx, "key", e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Valor (ej: rojo)"
-              value={item.value}
-              onChange={e => handleCustomFieldChange(idx, "value", e.target.value)}
+              value={carModel}
+              onChange={e => setCarModel(e.target.value)}
+              required
+              autoComplete="off"
+              placeholder="Ej: Toyota Corolla"
             />
           </div>
-        ))}
-        <button type="button" onClick={handleAddField}>Agregar campo</button>
-      </div>
-      <button type="submit" disabled={loading}>
-        {loading ? "Guardando..." : "Guardar"}
-      </button>
-      <button type="button" onClick={() => navigate('/')}>Volver</button>
-    </form>
+          <div className="input-group">
+            <label htmlFor="date">
+              <span className="icon">📅</span> Fecha
+            </label>
+            <input
+              id="date"
+              type="date"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              required
+            />
+          </div>
+          <div className="input-group">
+            <label htmlFor="description">
+              <span className="icon">📝</span> Descripción
+            </label>
+            <textarea
+              id="description"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              required
+              rows={3}
+              placeholder="Describe el mantenimiento realizado"
+            />
+          </div>
+          <div className="input-group">
+            <label htmlFor="cost">
+              <span className="icon">💶</span> Coste (€)
+            </label>
+            <input
+              id="cost"
+              type="number"
+              value={cost}
+              min="0"
+              step="0.01"
+              onChange={e => setCost(e.target.value)}
+              required
+              placeholder="Ej: 200"
+            />
+          </div>
+        </div>
+        <div className="custom-fields-section">
+          <div className="custom-fields-header">
+            <h4>Campos personalizados</h4>
+            <button
+              type="button"
+              className="add-field-btn"
+              onClick={handleAddField}
+              title="Agregar campo personalizado"
+            >
+              <span className="icon">➕</span> Agregar campo
+            </button>
+          </div>
+          {customFields.length === 0 && (
+            <div className="custom-fields-empty">
+              Agrega información personalizada como <b>kilometraje</b>, <b>taller</b>, etc.
+            </div>
+          )}
+          {customFields.map((item, idx) => (
+            <div key={idx} className="custom-field-row">
+              <input
+                type="text"
+                placeholder="Nombre del campo (ej: kilometraje)"
+                value={item.key}
+                onChange={e => handleCustomFieldChange(idx, "key", e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Valor (ej: 123456)"
+                value={item.value}
+                onChange={e => handleCustomFieldChange(idx, "value", e.target.value)}
+              />
+              <button
+                type="button"
+                className="remove-field-btn"
+                title="Eliminar campo"
+                aria-label="Eliminar campo"
+                onClick={() => handleRemoveField(idx)}
+              >
+                <span className="icon">🗑️</span>
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="form-btns-row">
+          <button type="submit" className="main-btn" disabled={loading}>
+            {loading ? (
+              <>
+                <span className="loader"></span> Guardando...
+              </>
+            ) : (
+              <>
+                <span className="icon">💾</span> Guardar
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={() => navigate('/')}
+            disabled={loading}
+          >
+            <span className="icon">←</span> Volver
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 

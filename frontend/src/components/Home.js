@@ -3,8 +3,8 @@ import React from 'react';
 const Home = ({ user }) => (
   <div>
     {user
-      ? <p>You are logged in!</p>
-      : <p>Please login or register to continue.</p>
+      ? <p>¡Has iniciado sesión!</p>
+      : <p>¡Bienvenido a CouchGarage! Por favor, inicia sesión o regístrate para acceder a todas las funciones.</p>
     }
   </div>
 );
