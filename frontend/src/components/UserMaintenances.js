@@ -28,7 +28,7 @@ const NON_EDITABLE_FIELDS = [
   "propietarioNombre",
 ];
 
-const ITEMS_PER_PAGE = 4;
+const ITEMS_PER_PAGE = 5;
 
 const UserMaintenances = () => {
   const [maintenances, setMaintenances] = useState([]);
@@ -182,6 +182,7 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Lista de campos estándar (no personalizados)
   const STANDARD_FIELDS = ["carModel", "date", "description", "cost"];
@@ -285,9 +286,12 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
     setSaving(false);
   };
 
+  // Confirmación personalizada para eliminar
+  const handleDeleteClick = () => setShowDeleteConfirm(true);
+  const handleDeleteCancel = () => setShowDeleteConfirm(false);
+
+  // Eliminar definitivamente
   const handleDelete = async () => {
-    if (!window.confirm("¿Seguro que deseas eliminar este mantenimiento?"))
-      return;
     setDeleting(true);
     setError("");
     setSuccess("");
@@ -310,6 +314,7 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
       setError("Error al eliminar");
     }
     setDeleting(false);
+    setShowDeleteConfirm(false);
   };
 
   const camposMostrar = Object.entries(maintenance).filter(
@@ -359,21 +364,37 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
             </div>
             {error && <Message type="error" onClose={() => setError("")}>{error}</Message>}
             {success && <Message type="success" onClose={() => setSuccess("")}>{success}</Message>}
-            <div className="mt-modal-actions">
-              <button
-                className="mt-modal-edit"
-                onClick={() => setEditing(true)}
-              >
-                Editar
-              </button>
-              <button
-                className="mt-modal-delete"
-                onClick={handleDelete}
-                disabled={deleting}
-              >
-                {deleting ? "Eliminando..." : "Eliminar"}
-              </button>
-            </div>
+            {showDeleteConfirm ? (
+              <div className="mt-modal-delete-confirm">
+                <Message type="error" onClose={handleDeleteCancel}>
+                  ¿Seguro que deseas eliminar este mantenimiento?
+                  <div style={{ marginTop: 12, display: "flex", gap: "1rem", justifyContent: "center" }}>
+                    <button className="mt-modal-delete" onClick={handleDelete} disabled={deleting}>
+                      {deleting ? "Eliminando..." : "Sí, eliminar"}
+                    </button>
+                    <button className="mt-modal-edit" onClick={handleDeleteCancel} disabled={deleting}>
+                      Cancelar
+                    </button>
+                  </div>
+                </Message>
+              </div>
+            ) : (
+              <div className="mt-modal-actions">
+                <button
+                  className="mt-modal-edit"
+                  onClick={() => setEditing(true)}
+                >
+                  Editar
+                </button>
+                <button
+                  className="mt-modal-delete"
+                  onClick={handleDeleteClick}
+                  disabled={deleting}
+                >
+                  Eliminar
+                </button>
+              </div>
+            )}
           </>
         ) : (
           <form className="mt-modal-editform" onSubmit={handleSubmit}>
