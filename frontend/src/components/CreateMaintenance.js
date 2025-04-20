@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../styles/CreateMaintenance.css";
 import { useNavigate } from 'react-router-dom';
+import Message from '../components/Message';
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
@@ -11,6 +12,7 @@ const CreateMaintenance = () => {
   const [cost, setCost] = useState("");
   const [customFields, setCustomFields] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null); // { type, text }
   const navigate = useNavigate();
 
   const handleAddField = () => {
@@ -31,6 +33,7 @@ const CreateMaintenance = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setMessage(null);
 
     const maintenanceData = {
       carModel,
@@ -52,14 +55,14 @@ const CreateMaintenance = () => {
         body: JSON.stringify(maintenanceData),
       });
       if (response.ok) {
-        alert("¡Mantenimiento guardado!");
-        navigate('/');
+        setMessage({ type: "success", text: "¡Mantenimiento guardado! Redirigiendo..." });
+        setTimeout(() => navigate('/'), 1200);
       } else {
         const data = await response.json();
-        alert("Error al guardar: " + (data.error || "Desconocido"));
+        setMessage({ type: "error", text: "Error al guardar: " + (data.error || "Desconocido") });
       }
     } catch (error) {
-      alert("Error de red al guardar mantenimiento");
+      setMessage({ type: "error", text: "Error de red al guardar mantenimiento" });
     } finally {
       setLoading(false);
     }
@@ -71,6 +74,11 @@ const CreateMaintenance = () => {
         <h2>
           <span role="img" aria-label="tools">🛠️</span> Nuevo Mantenimiento
         </h2>
+        {message && (
+          <Message type={message.type} onClose={() => setMessage(null)}>
+            {message.text}
+          </Message>
+        )}
         <div className="inputs-wrapper">
           <div className="input-group">
             <label htmlFor="carModel">

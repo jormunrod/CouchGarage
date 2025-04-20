@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../styles/UserMaintenances.css";
+import Message from "../components/Message";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
@@ -27,13 +28,16 @@ const NON_EDITABLE_FIELDS = [
   "propietarioNombre",
 ];
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 4;
 
 const UserMaintenances = () => {
   const [maintenances, setMaintenances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [refresh, setRefresh] = useState(false);
+
+  // Mensajes globales de éxito/error
+  const [message, setMessage] = useState(null);
 
   // Paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,18 +55,22 @@ const UserMaintenances = () => {
           setCurrentPage(1); // reset page on refresh
         } else {
           setMaintenances([]);
+          setMessage({ type: "error", text: "Error cargando mantenimientos" });
         }
       } catch (error) {
         setMaintenances([]);
+        setMessage({ type: "error", text: "Error de red cargando mantenimientos" });
       }
       setLoading(false);
     };
     fetchMaintenances();
   }, [refresh]);
 
-  const handleUpdate = () => {
+  const handleUpdate = (msg) => {
     setSelected(null);
     setRefresh((r) => !r); // Fuerza recarga de mantenimientos
+    // Si recibimos un mensaje (de éxito, borrado, etc), lo mostramos
+    if (msg) setMessage(msg);
   };
 
   // Lógica de paginación (falsa, todo en frontend)
@@ -83,6 +91,11 @@ const UserMaintenances = () => {
     <div className="user-mt-fullpage-bg">
       <div className="user-mt-card">
         <h2>Mis Mantenimientos</h2>
+        {message && (
+          <Message type={message.type} onClose={() => setMessage(null)}>
+            {message.text}
+          </Message>
+        )}
         <div className="user-mt-pagination-message">
           Haz clic sobre un mantenimiento para ver, editar o eliminar.
         </div>
@@ -167,6 +180,7 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
   const [customFields, setCustomFields] = useState([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [deleting, setDeleting] = useState(false);
 
   // Lista de campos estándar (no personalizados)
@@ -197,6 +211,7 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
       setForm(initialForm);
       setCustomFields(initialCustom);
       setError("");
+      setSuccess("");
       setSaving(false);
     }
   }, [editing, maintenance]);
@@ -231,6 +246,7 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
     e.preventDefault();
     setSaving(true);
     setError("");
+    setSuccess("");
     const required = ["carModel", "date", "description", "cost"];
     // Validación de obligatorios
     const missing = required.filter((field) => !form[field]);
@@ -257,7 +273,8 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
       );
       if (response.ok) {
         setEditing(false);
-        onUpdated(await response.json());
+        setSuccess("¡Mantenimiento actualizado!");
+        onUpdated({ type: "success", text: "¡Mantenimiento actualizado!" });
       } else {
         const data = await response.json();
         setError(data.error || "Error al actualizar");
@@ -273,6 +290,7 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
       return;
     setDeleting(true);
     setError("");
+    setSuccess("");
     try {
       const response = await fetch(
         `${API_URL}/api/maintenance/${maintenance._id}`,
@@ -282,7 +300,8 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
         }
       );
       if (response.ok) {
-        onUpdated();
+        setSuccess("¡Mantenimiento eliminado!");
+        onUpdated({ type: "success", text: "¡Mantenimiento eliminado!" });
       } else {
         const data = await response.json();
         setError(data.error || "Error al eliminar");
@@ -338,7 +357,8 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                 );
               })}
             </div>
-            {error && <div className="mt-modal-error">{error}</div>}
+            {error && <Message type="error" onClose={() => setError("")}>{error}</Message>}
+            {success && <Message type="success" onClose={() => setSuccess("")}>{success}</Message>}
             <div className="mt-modal-actions">
               <button
                 className="mt-modal-edit"
@@ -393,7 +413,7 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                   )}
                 </div>
               ))}
-        
+
               {/* Campos personalizados */}
               <div className="custom-fields-section">
                 <div className="custom-fields-header">
@@ -439,7 +459,8 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                 ))}
               </div>
             </div>
-            {error && <div className="mt-modal-error">{error}</div>}
+            {error && <Message type="error" onClose={() => setError("")}>{error}</Message>}
+            {success && <Message type="success" onClose={() => setSuccess("")}>{success}</Message>}
             <div className="mt-modal-actions">
               <button type="submit" className="mt-modal-edit" disabled={saving}>
                 {saving ? "Guardando..." : "Guardar"}
