@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Register.css';
+import Message from '../components/Message';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
@@ -9,22 +10,25 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [password_confirm, setPasswordConfirm] = useState('');
+  const [message, setMessage] = useState(null); // { type: "success"|"error"|"info", text: "" }
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setMessage(null);
+
+    if (!username || !password) {
+      setMessage({ type: 'error', text: 'Por favor, completa todos los campos.' });
+      return;
+    }
+    if (password.length < 6) {
+      setMessage({ type: 'error', text: 'La contraseña debe tener al menos 6 caracteres.' });
+      return;
+    }
+    if (password !== password_confirm) {
+      setMessage({ type: 'error', text: 'Las contraseñas no coinciden.' });
+      return;
+    }
     try {
-      if (!username || !password) {
-        alert('Por favor, completa todos los campos.');
-        return;
-      }
-      if (password.length < 6) {
-        alert('La contraseña debe tener al menos 6 caracteres.');
-        return;
-      }
-      if (password !== password_confirm) {
-        alert('Las contraseñas no coinciden.');
-        return;
-      }
       const response = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -32,14 +36,14 @@ const Register = () => {
         body: JSON.stringify({ username, password }),
       });
       if (response.ok) {
-        alert('Usuario registrado con éxito');
-        navigate('/login');
+        setMessage({ type: 'success', text: 'Usuario registrado con éxito. Redirigiendo al login...' });
+        setTimeout(() => navigate('/login'), 1200);
       } else {
         const errorData = await response.json();
-        alert(`Error: ${errorData.error} - ${errorData.details || ''}`);
+        setMessage({ type: 'error', text: `Error: ${errorData.error} - ${errorData.details || ''}` });
       }
     } catch (error) {
-      alert('Error al registrar usuario');
+      setMessage({ type: 'error', text: 'Error al registrar usuario' });
     }
   };
 
@@ -47,6 +51,11 @@ const Register = () => {
     <div className="register-fullpage-bg">
       <form onSubmit={handleRegister} className="register-form">
         <h2>Registrarse</h2>
+        {message && (
+          <Message type={message.type} onClose={() => setMessage(null)}>
+            {message.text}
+          </Message>
+        )}
         <input
           type="text"
           placeholder="Nombre de usuario"

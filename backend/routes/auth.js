@@ -109,7 +109,7 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Error logging in:", error);
     if (error.response && error.response.status === 401) {
-      return res.status(401).send({ error: "Invalid credentials" });
+      return res.status(401).send({ error: "Credenciales incorrectas" });
     }
     res.status(500).send({ error: "Error logging in", details: error.message });
   }

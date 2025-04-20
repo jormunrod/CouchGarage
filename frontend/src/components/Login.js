@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import '../styles/Login.css';
 import { useNavigate } from 'react-router-dom';
+import Message from '../components/Message';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
 const Login = ({ fetchUser }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [message, setMessage] = useState(null); // { type: "success"|"error"|"info", text: "" }
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setMessage(null);
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
@@ -19,14 +22,15 @@ const Login = ({ fetchUser }) => {
         body: JSON.stringify({ username, password }),
       });
       if (response.ok) {
+        setMessage({ type: "success", text: "Inicio de sesión correcto. Redirigiendo..." });
         await fetchUser();
-        navigate('/');
+        setTimeout(() => navigate('/'), 700);
       } else {
         const errorData = await response.json();
-        alert(`Error: ${errorData.error} - ${errorData.details || ''}`);
+        setMessage({ type: "error", text: `Error: ${errorData.error} - ${errorData.details || ''}` });
       }
     } catch (error) {
-      alert('Error al iniciar sesión');
+      setMessage({ type: "error", text: "Error al iniciar sesión" });
     }
   };
 
@@ -34,6 +38,11 @@ const Login = ({ fetchUser }) => {
     <div className="login-fullpage-bg">
       <form onSubmit={handleLogin} className="login-form">
         <h2>Iniciar sesión</h2>
+        {message && (
+          <Message type={message.type} onClose={() => setMessage(null)}>
+            {message.text}
+          </Message>
+        )}
         <input
           type="text"
           placeholder="Nombre de usuario"
