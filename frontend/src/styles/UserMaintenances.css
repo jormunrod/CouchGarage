@@ -38,10 +38,43 @@
   letter-spacing: 0.03em;
 }
 
+.user-mt-pagination-message {
+  text-align: center;
+  font-size: 1.08em;
+  color: #7fc8ff;
+  margin-bottom: 14px;
+}
+
 .user-mt-list {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.user-mt-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 22px;
+  margin-top: 25px;
+}
+
+.user-mt-pagination-btn {
+  background: #47b1f6;
+  color: #fff;
+  border: none;
+  padding: 7px 24px;
+  border-radius: 22px;
+  font-size: 1.02rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, opacity 0.18s;
+}
+.user-mt-pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #204060;
+  color: #b0c7e6;
 }
 
 .user-mt-maint-card {
@@ -214,4 +247,10 @@
   margin: 0.9em 0 0.4em 0;
   text-align: center;
   font-size: 1.04em;
+}
+
+.user-mt-pagination-info {
+  color: #fff;
+  font-weight: 500;
+  font-size: 1.08em;
 }

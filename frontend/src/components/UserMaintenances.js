@@ -16,16 +16,27 @@ const FIELD_LABELS = {
   propietarioNombre: "Propietario",
 };
 
-// Campos que NO se deben editar
 const NON_EDITABLE_FIELDS = [
-  "_id", "createdAt", "updatedAt", "userId", "_rev", "owner", "propietario", "propietarioNombre"
+  "_id",
+  "createdAt",
+  "updatedAt",
+  "userId",
+  "_rev",
+  "owner",
+  "propietario",
+  "propietarioNombre",
 ];
+
+const ITEMS_PER_PAGE = 5;
 
 const UserMaintenances = () => {
   const [maintenances, setMaintenances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [refresh, setRefresh] = useState(false);
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchMaintenances = async () => {
@@ -37,6 +48,7 @@ const UserMaintenances = () => {
         if (response.ok) {
           const data = await response.json();
           setMaintenances(data);
+          setCurrentPage(1); // reset page on refresh
         } else {
           setMaintenances([]);
         }
@@ -53,44 +65,89 @@ const UserMaintenances = () => {
     setRefresh((r) => !r); // Fuerza recarga de mantenimientos
   };
 
+  // Lógica de paginación (falsa, todo en frontend)
+  const totalPages = Math.max(
+    1,
+    Math.ceil(maintenances.length / ITEMS_PER_PAGE)
+  );
+  const paginatedMaintenances = maintenances.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePrev = () => setCurrentPage((p) => (p > 1 ? p - 1 : 1));
+  const handleNext = () =>
+    setCurrentPage((p) => (p < totalPages ? p + 1 : totalPages));
+
   return (
     <div className="user-mt-fullpage-bg">
       <div className="user-mt-card">
         <h2>Mis Mantenimientos</h2>
+        <div className="user-mt-pagination-message">
+          Haz clic sobre un mantenimiento para ver, editar o eliminar.
+        </div>
         {loading ? (
           <div className="user-mt-loading">Cargando mantenimientos...</div>
         ) : !maintenances.length ? (
-          <div className="user-mt-empty">No hay mantenimientos registrados.</div>
-        ) : (
-          <div className="user-mt-list">
-            {maintenances.map((item) => (
-              <div
-                key={item._id}
-                className="user-mt-maint-card"
-                tabIndex={0}
-                onClick={() => setSelected(item)}
-                onKeyDown={(e) => { if (e.key === "Enter") setSelected(item); }}
-                role="button"
-                aria-label={`Ver detalles de mantenimiento ${item.carModel}`}
-              >
-                <div>
-                  <strong>Modelo:</strong> <span>{item.carModel}</span>
-                </div>
-                <div>
-                  <strong>Fecha:</strong> <span>{item.date}</span>
-                </div>
-                <div>
-                  <strong>Descripción:</strong> <span>{item.description}</span>
-                </div>
-                <div>
-                  <strong>Coste:</strong> <span>{item.cost} €</span>
-                </div>
-                <div className="user-mt-date">
-                  <em>Creado: {new Date(item.createdAt).toLocaleString("es-ES")}</em>
-                </div>
-              </div>
-            ))}
+          <div className="user-mt-empty">
+            No hay mantenimientos registrados.
           </div>
+        ) : (
+          <>
+            <div className="user-mt-list">
+              {paginatedMaintenances.map((item) => (
+                <div
+                  key={item._id}
+                  className="user-mt-maint-card"
+                  tabIndex={0}
+                  onClick={() => setSelected(item)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") setSelected(item);
+                  }}
+                  role="button"
+                  aria-label={`Ver detalles de mantenimiento ${item.carModel}`}
+                >
+                  <div>
+                    <strong>Modelo:</strong> <span>{item.carModel}</span>
+                  </div>
+                  <div>
+                    <strong>Fecha:</strong> <span>{item.date}</span>
+                  </div>
+                  <div>
+                    <strong>Descripción:</strong>{" "}
+                    <span>{item.description}</span>
+                  </div>
+                  <div>
+                    <strong>Coste:</strong> <span>{item.cost} €</span>
+                  </div>
+                  <div className="user-mt-date">
+                    <em>
+                      Creado: {new Date(item.createdAt).toLocaleString("es-ES")}
+                    </em>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="user-mt-pagination">
+              <button
+                className="user-mt-pagination-btn"
+                onClick={handlePrev}
+                disabled={currentPage === 1}
+              >
+                Anterior
+              </button>
+              <span className="user-mt-pagination-info">
+                Página {currentPage} de {totalPages}
+              </span>
+              <button
+                className="user-mt-pagination-btn"
+                onClick={handleNext}
+                disabled={currentPage === totalPages}
+              >
+                Siguiente
+              </button>
+            </div>
+          </>
         )}
       </div>
       {selected && (
@@ -113,16 +170,18 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, []);
 
-  // Inicializa el formulario con todos los campos editables, incluidos personalizados
   useEffect(() => {
     if (editing) {
-      const editable = Object.keys(maintenance)
-        .filter(key => !NON_EDITABLE_FIELDS.includes(key));
+      const editable = Object.keys(maintenance).filter(
+        (key) => !NON_EDITABLE_FIELDS.includes(key)
+      );
       const initialForm = {};
-      editable.forEach(key => {
+      editable.forEach((key) => {
         initialForm[key] = maintenance[key] ?? "";
       });
       setForm(initialForm);
@@ -133,28 +192,30 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(f => ({ ...f, [name]: value }));
+    setForm((f) => ({ ...f, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError("");
-    // Validación básica: campos requeridos
     const required = ["carModel", "date", "description", "cost"];
-    const missing = required.filter(field => !form[field]);
+    const missing = required.filter((field) => !form[field]);
     if (missing.length) {
       setError("Por favor, completa todos los campos obligatorios.");
       setSaving(false);
       return;
     }
     try {
-      const response = await fetch(`${API_URL}/api/maintenance/${maintenance._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(form),
-      });
+      const response = await fetch(
+        `${API_URL}/api/maintenance/${maintenance._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(form),
+        }
+      );
       if (response.ok) {
         setEditing(false);
         onUpdated(await response.json());
@@ -169,14 +230,18 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("¿Seguro que deseas eliminar este mantenimiento?")) return;
+    if (!window.confirm("¿Seguro que deseas eliminar este mantenimiento?"))
+      return;
     setDeleting(true);
     setError("");
     try {
-      const response = await fetch(`${API_URL}/api/maintenance/${maintenance._id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${API_URL}/api/maintenance/${maintenance._id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
       if (response.ok) {
         onUpdated();
       } else {
@@ -189,15 +254,20 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
     setDeleting(false);
   };
 
-  // Campos a mostrar (todos menos los no editables)
   const camposMostrar = Object.entries(maintenance).filter(
     ([key]) => !["userId", "_rev"].includes(key)
   );
 
   return (
     <div className="mt-modal-overlay" onClick={onClose}>
-      <div className="mt-modal" onClick={e => e.stopPropagation()} tabIndex={-1}>
-        <button className="mt-modal-close" onClick={onClose} title="Cerrar">×</button>
+      <div
+        className="mt-modal"
+        onClick={(e) => e.stopPropagation()}
+        tabIndex={-1}
+      >
+        <button className="mt-modal-close" onClick={onClose} title="Cerrar">
+          ×
+        </button>
         <h3>Detalle de Mantenimiento</h3>
         {!editing ? (
           <>
@@ -205,7 +275,11 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
               {camposMostrar.map(([key, value]) => {
                 let label = FIELD_LABELS[key] || key;
                 let displayValue = value;
-                if (key === "createdAt" || key === "updatedAt" || key === "date") {
+                if (
+                  key === "createdAt" ||
+                  key === "updatedAt" ||
+                  key === "date"
+                ) {
                   try {
                     displayValue = new Date(value).toLocaleString(
                       "es-ES",
@@ -227,8 +301,17 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
             </div>
             {error && <div className="mt-modal-error">{error}</div>}
             <div className="mt-modal-actions">
-              <button className="mt-modal-edit" onClick={() => setEditing(true)}>Editar</button>
-              <button className="mt-modal-delete" onClick={handleDelete} disabled={deleting}>
+              <button
+                className="mt-modal-edit"
+                onClick={() => setEditing(true)}
+              >
+                Editar
+              </button>
+              <button
+                className="mt-modal-delete"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
                 {deleting ? "Eliminando..." : "Eliminar"}
               </button>
             </div>
@@ -245,7 +328,12 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                       name={key}
                       value={form[key]}
                       onChange={handleChange}
-                      required={["carModel", "date", "description", "cost"].includes(key)}
+                      required={[
+                        "carModel",
+                        "date",
+                        "description",
+                        "cost",
+                      ].includes(key)}
                     />
                   ) : key === "cost" ? (
                     <>
@@ -257,7 +345,8 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                         min="0"
                         step="0.01"
                         required
-                      /> €
+                      />{" "}
+                      €
                     </>
                   ) : (
                     <input
@@ -265,7 +354,12 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
                       name={key}
                       value={form[key]}
                       onChange={handleChange}
-                      required={["carModel", "date", "description", "cost"].includes(key)}
+                      required={[
+                        "carModel",
+                        "date",
+                        "description",
+                        "cost",
+                      ].includes(key)}
                     />
                   )}
                 </div>
@@ -276,7 +370,12 @@ function MaintenanceModal({ maintenance, onClose, onUpdated }) {
               <button type="submit" className="mt-modal-edit" disabled={saving}>
                 {saving ? "Guardando..." : "Guardar"}
               </button>
-              <button type="button" className="mt-modal-delete" onClick={() => setEditing(false)} disabled={saving}>
+              <button
+                type="button"
+                className="mt-modal-delete"
+                onClick={() => setEditing(false)}
+                disabled={saving}
+              >
                 Cancelar
               </button>
             </div>
