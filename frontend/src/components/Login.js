@@ -33,10 +33,10 @@ const Login = ({ fetchUser }) => {
   return (
     <div className="login-fullpage-bg">
       <form onSubmit={handleLogin} className="login-form">
-        <h2>Login</h2>
+        <h2>Iniciar sesión</h2>
         <input
           type="text"
-          placeholder="Username"
+          placeholder="Nombre de usuario"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
@@ -44,15 +44,18 @@ const Login = ({ fetchUser }) => {
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Login</button>
+        <button type="submit">Iniciar sesión</button>
         <button type="button" onClick={() => navigate('/')}>
-          Back
+          Volver
         </button>
+        <p>
+          ¿No tienes cuenta? <a href="/register">Regístrate aquí</a>
+        </p>
       </form>
     </div>
   );
