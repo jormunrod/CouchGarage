@@ -1,8 +1,5 @@
 const nano = require("nano");
 require("dotenv").config();
-
-// Expected COUCHDB_URL to include credentials, e.g.:
-// http://admin:admin@couchdb:5984
 const couchdbUrl = "http://admin:admin@couchdb:5984";
 const couchdb = nano(couchdbUrl);
 
@@ -54,8 +51,6 @@ async function setupDatabase() {
 
     const database = couchdb.use(databaseName);
 
-    
-
     // Check if the database is empty.
     const docs = await database.list({ limit: 1 });
     if (docs.rows.length === 0) {
@@ -70,23 +65,23 @@ async function setupDatabase() {
 
     try {
       const designDoc = {
-        _id: '_design/maintenances',
+        _id: "_design/maintenances",
         views: {
           by_user: {
             map: `function(doc) {
               if (doc.userId) {
                 emit(doc.userId, null);
               }
-            }`
-          }
-        }
+            }`,
+          },
+        },
       };
-      
-      await database.insert(designDoc).catch(e => {
-        if (e.status !== 409) throw e; // Ignorar si ya existe
+
+      await database.insert(designDoc).catch((e) => {
+        if (e.status !== 409) throw e;
       });
     } catch (error) {
-      console.error('Error creating view:', error);
+      console.error("Error creating view:", error);
     }
 
     return database;

@@ -1,0 +1,104 @@
+.home-fullpage-bg {
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(135deg, #23272f 60%, #47b1f6 120%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.home-card {
+  background: rgba(24, 28, 34, 0.97);
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  border-radius: 14px;
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 340px;
+  margin: 0;
+  animation: pop-fadein 0.5s;
+}
+
+@keyframes pop-fadein {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.home-logo {
+  width: 150px;
+  height: auto;
+  margin-bottom: 1.2rem;
+}
+
+.home-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #47b1f6;
+  margin-bottom: 0.8rem;
+  text-align: center;
+}
+
+.home-subtitle {
+  font-size: 1.08rem;
+  color: #b0c7e6;
+  margin-bottom: 2.1rem;
+  text-align: center;
+}
+
+.home-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  width: 100%;
+}
+
+.home-btn {
+  background: #47b1f6;
+  color: #fff;
+  padding: 0.75rem 0;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.2s;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.home-btn.secondary {
+  background: #23272f;
+  color: #47b1f6;
+  border: 2px solid #47b1f6;
+}
+
+.home-btn:hover,
+.home-btn.secondary:hover {
+  background: #3194cf;
+  color: #fff;
+}
+
+.home-welcome {
+  font-size: 1.07rem;
+  color: #b0c7e6;
+  margin-bottom: 0.3rem;
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  .home-card {
+    padding: 1.1rem 0.5rem 1rem 0.5rem;
+    max-width: 98vw;
+  }
+}

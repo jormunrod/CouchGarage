@@ -1,7 +1,7 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
 const LogoutButton = ({ fetchUser }) => {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ const LogoutButton = ({ fetchUser }) => {
     try {
       const response = await fetch(`${API_URL}/api/auth/logout`, {
         method: "POST",
-        credentials: "include"
+        credentials: "include",
       });
       if (response.ok) {
         alert("Logout successful");
@@ -18,7 +18,7 @@ const LogoutButton = ({ fetchUser }) => {
         navigate("/");
       } else {
         const errorData = await response.json();
-        alert(`Error: ${errorData.error} - ${errorData.details || ''}`);
+        alert(`Error: ${errorData.error} - ${errorData.details || ""}`);
       }
     } catch (error) {
       alert("Error al cerrar sesión");
