@@ -27,19 +27,15 @@ router.post("/", async (req, res) => {
     }
 
     // 2. Tomar datos del mantenimiento del body
-    const { carModel, date, description, cost } = req.body;
-    if (!carModel || !date || !description || !cost) {
-      return res.status(400).json({ error: "Faltan datos obligatorios." });
-    }
-
-    // 3. Guardar documento con el usuario asociado
+    const { carModel, date, description, cost, ...rest } = req.body;
     const doc = {
       carModel,
       date,
       description,
       cost: parseFloat(cost),
-      userId: username, // Asociación segura
+      userId: username,
       createdAt: new Date().toISOString(),
+      ...rest, // aquí van los campos personalizados
     };
 
     const response = await db.insert(doc);
@@ -64,7 +60,7 @@ router.get("/mine", async (req, res) => {
       key: username,
       include_docs: true,
     });
-    const maintenances = result.rows.map(row => row.doc);
+    const maintenances = result.rows.map((row) => row.doc);
     res.json(maintenances);
   } catch (error) {
     console.error("Error al listar mantenimientos:", error);
