@@ -7,6 +7,7 @@ import Navbar from "./Navbar";
 import CreateMaintenance from "./CreateMaintenance";
 import UserMaintenances from "./UserMaintenances";
 import RequireAuth from "./RequireAuth";
+import About from "./About";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
@@ -54,6 +55,8 @@ function App() {
               )
             }
           />
+          <Route path="/about" element={<About />} />
+
           <Route path="/login" element={<Login fetchUser={fetchUser} />} />
           <Route path="/register" element={<Register />} />
           <Route

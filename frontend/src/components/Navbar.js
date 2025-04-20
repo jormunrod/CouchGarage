@@ -33,7 +33,6 @@ const Navbar = ({ user, fetchUser, setUser }) => {
         <span className="navbar-brand">CouchGarage</span>
       </div>
       <div className="navbar-links">
-        <Link to="/">Inicio</Link>
         {user && user.username ? (
           <>
             <Link to="/maintenances/create">Nuevo Mantenimiento</Link>
@@ -45,6 +44,7 @@ const Navbar = ({ user, fetchUser, setUser }) => {
             <Link to="/register">Registrarse</Link>
           </>
         )}
+        <Link to="/about">Sobre nosotros</Link>
       </div>
       <div className="navbar-actions">
         {user && user.username ? (

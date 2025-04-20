@@ -1,0 +1,62 @@
+.about-fullpage-bg {
+    min-height: 100vh;
+    width: 100vw;
+    background: linear-gradient(135deg, #23272f 60%, #47b1f6 120%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+  }
+  
+  .about-card {
+    background: rgba(24, 28, 34, 0.97);
+    padding: 2.5rem 2.5rem 2rem 2.5rem;
+    border-radius: 14px;
+    box-shadow: 0 6px 32px rgba(0,0,0,0.35);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 440px;
+    margin: 0;
+    animation: pop-fadein 0.5s;
+  }
+  
+  .about-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #47b1f6;
+    margin-bottom: 1.2rem;
+    text-align: center;
+  }
+  
+  .about-description {
+    font-size: 1.1rem;
+    color: #b0c7e6;
+    margin-bottom: 1.2rem;
+    text-align: center;
+  }
+  
+  .about-features {
+    color: #b0c7e6;
+    font-size: 1rem;
+    margin-bottom: 1.6rem;
+    padding-left: 1.2rem;
+    align-self: flex-start;
+  }
+  .about-features li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .about-team {
+    color: #b0c7e6;
+    font-size: 1.04rem;
+    text-align: center;
+  }
+  
+  @media (max-width: 520px) {
+    .about-card {
+      padding: 1.2rem 0.5rem 1rem 0.5rem;
+      max-width: 98vw;
+    }
+  }
