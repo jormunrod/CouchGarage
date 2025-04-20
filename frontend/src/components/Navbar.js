@@ -1,9 +1,13 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Navbar.css';
 
-const Navbar = ({ user, setView, setUser, fetchUser }) => {
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+
+const Navbar = ({ user, fetchUser, setUser }) => {
+  const navigate = useNavigate();
+
   const handleLogout = async () => {
-    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
     try {
       const response = await fetch(`${API_URL}/api/auth/logout`, {
         method: "POST",
@@ -11,7 +15,7 @@ const Navbar = ({ user, setView, setUser, fetchUser }) => {
       });
       if (response.ok) {
         await fetchUser();
-        setView("home");
+        navigate("/");
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.error} - ${errorData.details || ''}`);
@@ -23,16 +27,17 @@ const Navbar = ({ user, setView, setUser, fetchUser }) => {
 
   return (
     <nav className="navbar">
-      <button onClick={() => setView('home')}>Home</button>
+      <Link to="/">Home</Link>
       {user && user.username ? (
         <>
+          <Link to="/maintenances/create">Nuevo Mantenimiento</Link>
           <span className="navbar-user">Hello, {user.username}</span>
           <button onClick={handleLogout}>Logout</button>
         </>
       ) : (
         <>
-          <button onClick={() => setView('login')}>Login</button>
-          <button onClick={() => setView('register')}>Register</button>
+          <Link to="/login">Login</Link>
+          <Link to="/register">Register</Link>
         </>
       )}
     </nav>

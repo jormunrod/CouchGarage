@@ -1,0 +1,62 @@
+.create-maintenance-form {
+  background: #23272f;
+  padding: 2rem 2.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 350px;
+  margin: 2rem auto;
+}
+
+.create-maintenance-form h2 {
+  margin-bottom: 1.5rem;
+  color: #fff;
+  text-align: center;
+  font-weight: 600;
+}
+
+.create-maintenance-form label {
+  color: #dedede;
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.create-maintenance-form input,
+.create-maintenance-form textarea {
+  padding: 0.7rem 1rem;
+  margin-bottom: 1.1rem;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background: #181c22;
+  color: #fff;
+  font-size: 1rem;
+  resize: none;
+  transition: border 0.2s;
+}
+
+.create-maintenance-form input:focus,
+.create-maintenance-form textarea:focus {
+  border: 1.5px solid #47b1f6;
+  outline: none;
+}
+
+.create-maintenance-form button {
+  background: #47b1f6;
+  color: #fff;
+  border: none;
+  padding: 0.7rem 0;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 10px;
+  margin-top: 4px;
+  transition: background 0.2s;
+}
+
+.create-maintenance-form button:hover {
+  background: #3194cf;
+}

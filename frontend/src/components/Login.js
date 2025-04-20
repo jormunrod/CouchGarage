@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import '../styles/Login.css';
+import { useNavigate } from 'react-router-dom';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
-const Login = ({ setView, fetchUser }) => {
+const Login = ({ fetchUser }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -18,7 +20,7 @@ const Login = ({ setView, fetchUser }) => {
       });
       if (response.ok) {
         await fetchUser();
-        setView('home');
+        navigate('/');
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.error} - ${errorData.details || ''}`);
@@ -47,7 +49,7 @@ const Login = ({ setView, fetchUser }) => {
         required
       />
       <button type="submit">Login</button>
-      <button type="button" onClick={() => setView('home')}>
+      <button type="button" onClick={() => navigate('/')}>
         Back
       </button>
     </form>

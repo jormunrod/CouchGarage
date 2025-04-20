@@ -1,8 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
-const LogoutButton = ({ setUser, setView, fetchUser }) => {
+const LogoutButton = ({ fetchUser }) => {
+  const navigate = useNavigate();
+
   const handleLogout = async () => {
     try {
       const response = await fetch(`${API_URL}/api/auth/logout`, {
@@ -12,7 +15,7 @@ const LogoutButton = ({ setUser, setView, fetchUser }) => {
       if (response.ok) {
         alert("Logout successful");
         await fetchUser();
-        setView("home");
+        navigate("/");
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.error} - ${errorData.details || ''}`);
