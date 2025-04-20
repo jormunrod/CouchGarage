@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import '../styles/Register.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
@@ -15,7 +16,6 @@ const Register = ({ setView }) => {
         credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
-
       if (response.ok) {
         alert('Usuario registrado con éxito');
         setView('login');
@@ -29,7 +29,7 @@ const Register = ({ setView }) => {
   };
 
   return (
-    <form onSubmit={handleRegister}>
+    <form onSubmit={handleRegister} className="register-form">
       <h2>Register</h2>
       <input
         type="text"
@@ -37,6 +37,7 @@ const Register = ({ setView }) => {
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         required
+        autoFocus
       />
       <input
         type="password"

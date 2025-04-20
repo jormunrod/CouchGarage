@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import '../styles/Login.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
@@ -15,11 +16,8 @@ const Login = ({ setView, fetchUser }) => {
         credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
-
       if (response.ok) {
-        // Espera a que se refresque el usuario
         await fetchUser();
-        alert('Login successful');
         setView('home');
       } else {
         const errorData = await response.json();
@@ -31,7 +29,7 @@ const Login = ({ setView, fetchUser }) => {
   };
 
   return (
-    <form onSubmit={handleLogin}>
+    <form onSubmit={handleLogin} className="login-form">
       <h2>Login</h2>
       <input
         type="text"
@@ -39,6 +37,7 @@ const Login = ({ setView, fetchUser }) => {
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         required
+        autoFocus
       />
       <input
         type="password"
