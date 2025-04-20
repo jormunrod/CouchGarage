@@ -20,7 +20,7 @@ const Register = () => {
       });
       if (response.ok) {
         alert('Usuario registrado con éxito');
-        navigate('/login'); // Ir a la página de login tras registrar
+        navigate('/login');
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.error} - ${errorData.details || ''}`);
@@ -31,28 +31,30 @@ const Register = () => {
   };
 
   return (
-    <form onSubmit={handleRegister} className="register-form">
-      <h2>Register</h2>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        required
-        autoFocus
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <button type="submit">Register</button>
-      <button type="button" onClick={() => navigate('/')}>
-        Back
-      </button>
-    </form>
+    <div className="register-fullpage-bg">
+      <form onSubmit={handleRegister} className="register-form">
+        <h2>Registro</h2>
+        <input
+          type="text"
+          placeholder="Usuario"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          autoFocus
+        />
+        <input
+          type="password"
+          placeholder="Contraseña"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit">Registrar</button>
+        <button type="button" onClick={() => navigate('/')}>
+          Volver
+        </button>
+      </form>
+    </div>
   );
 };
 

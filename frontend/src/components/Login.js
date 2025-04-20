@@ -31,28 +31,30 @@ const Login = ({ fetchUser }) => {
   };
 
   return (
-    <form onSubmit={handleLogin} className="login-form">
-      <h2>Login</h2>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        required
-        autoFocus
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <button type="submit">Login</button>
-      <button type="button" onClick={() => navigate('/')}>
-        Back
-      </button>
-    </form>
+    <div className="login-fullpage-bg">
+      <form onSubmit={handleLogin} className="login-form">
+        <h2>Login</h2>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          autoFocus
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit">Login</button>
+        <button type="button" onClick={() => navigate('/')}>
+          Back
+        </button>
+      </form>
+    </div>
   );
 };
 
