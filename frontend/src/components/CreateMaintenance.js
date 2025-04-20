@@ -10,16 +10,39 @@ const CreateMaintenance = ({ user }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Cuando el backend esté listo, aquí se hará el fetch real
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Simulación de guardado
-    setTimeout(() => {
-      alert("¡(Simulado) Mantenimiento guardado!");
+  
+    try {
+      const response = await fetch(`${API_URL}/api/maintenance`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          carModel,
+          date,
+          description,
+          cost,
+        }),
+      });
+  
+      if (response.ok) {
+        alert("¡Mantenimiento guardado!");
+        navigate('/');
+      } else {
+        const data = await response.json();
+        alert("Error al guardar: " + (data.error || "Desconocido"));
+      }
+    } catch (error) {
+      alert("Error de red al guardar mantenimiento");
+    } finally {
       setLoading(false);
-      navigate('/');
-    }, 800);
+    }
   };
 
   return (

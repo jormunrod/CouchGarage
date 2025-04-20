@@ -1,56 +1,74 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const database = require('../utils/couchdb');
+const { getDatabase } = require("../utils/couchdb");
+const axios = require("axios");
 
-// Middleware para verificar la sesión del usuario
-const authenticateUser = async (req, res, next) => {
+// Utilidad para extraer usuario autenticado desde la cookie
+async function getSessionUser(req) {
+  // Extrae la cookie del request y consulta /_session en CouchDB
+  const cookieHeader = req.headers.cookie || "";
+  const sessionRes = await axios.get("http://couchdb:5984/_session", {
+    headers: { Cookie: cookieHeader },
+  });
+  const userCtx = sessionRes.data && sessionRes.data.userCtx;
+  if (userCtx && userCtx.name) return userCtx.name;
+  return null;
+}
+
+// --- Crear mantenimiento ---
+router.post("/", async (req, res) => {
   try {
-    const session = await nanoAuth.session({
-      headers: { Cookie: req.headers.cookie || "" },
-    });
-    if (session.userCtx && session.userCtx.name) {
-      req.user = session.userCtx;
-      next();
-    } else {
-      res.status(401).json({ error: 'Unauthorized' });
+    const db = await getDatabase();
+
+    // 1. Identificar usuario autenticado desde la sesión
+    const username = await getSessionUser(req);
+    if (!username) {
+      return res.status(401).json({ error: "No autenticado" });
     }
-  } catch (error) {
-    res.status(500).json({ error: 'Error validating session' });
-  }
-};
 
-// Aplicar middleware a todas las rutas de mantenimiento
-router.use(authenticateUser);
+    // 2. Tomar datos del mantenimiento del body
+    const { carModel, date, description, cost } = req.body;
+    if (!carModel || !date || !description || !cost) {
+      return res.status(400).json({ error: "Faltan datos obligatorios." });
+    }
 
-// Crear un nuevo mantenimiento (asociado al usuario logueado)
-router.post('/', async (req, res) => {
-  try {
-    const maintenanceData = {
-      ...req.body,
-      userId: req.user.name, // Añade el ID del usuario
-      createdAt: new Date().toISOString()
+    // 3. Guardar documento con el usuario asociado
+    const doc = {
+      carModel,
+      date,
+      description,
+      cost: parseFloat(cost),
+      userId: username, // Asociación segura
+      createdAt: new Date().toISOString(),
     };
-    const response = await database.insert(maintenanceData);
-    res.status(201).json(response);
+
+    const response = await db.insert(doc);
+    res.status(201).json({ ok: true, id: response.id, rev: response.rev });
   } catch (error) {
-    console.error('Error creating maintenance:', error);
-    res.status(500).json({ error: 'Error creating maintenance.' });
+    console.error("Error al guardar mantenimiento:", error);
+    res.status(500).json({ error: "Error al guardar mantenimiento." });
   }
 });
 
-// Listar todos los mantenimientos del usuario logueado
-router.get('/', async (req, res) => {
+// --- Listar mantenimientos del usuario autenticado ---
+router.get("/mine", async (req, res) => {
   try {
-    // Usar una vista de CouchDB que filtre por userId
-    const response = await database.view('maintenances', 'by_user', {
-      key: req.user.name,
-      include_docs: true
+    const db = await getDatabase();
+    const username = await getSessionUser(req);
+    if (!username) {
+      return res.status(401).json({ error: "No autenticado" });
+    }
+
+    // Usa la view para filtrar por userId
+    const result = await db.view("maintenances", "by_user", {
+      key: username,
+      include_docs: true,
     });
-    const maintenances = response.rows.map(row => row.doc);
-    res.status(200).json(maintenances);
+    const maintenances = result.rows.map(row => row.doc);
+    res.json(maintenances);
   } catch (error) {
-    console.error('Error listing maintenances:', error);
-    res.status(500).json({ error: 'Error listing maintenances.' });
+    console.error("Error al listar mantenimientos:", error);
+    res.status(500).json({ error: "Error al listar mantenimientos." });
   }
 });
 
