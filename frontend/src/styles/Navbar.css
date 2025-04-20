@@ -1,50 +1,117 @@
 .navbar {
-  background: #1a1a1a;
+  background: rgba(24,28,34,0.97);
   color: #fff;
-  padding: 10px 20px;
+  padding: 0.6rem 2vw;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  min-height: 60px;
+  box-shadow: 0 2px 14px 0 #0002;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
 }
 
-.navbar a {
-  background: #333;
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 4px;
-  margin-right: 8px;
+.navbar-logo-area {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  user-select: none;
+  transition: filter 0.18s;
+}
+
+.navbar-logo-area:hover {
+  filter: brightness(1.1);
+}
+
+.navbar-logo {
+  width: 50px;
+  border-radius: 6px;
+  margin-right: 2px;
+  background: transparent;
+}
+
+.navbar-brand {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #47b1f6;
+  text-shadow: 0 1px 8px #2228;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.navbar-links a {
+  background: transparent;
+  color: #c9eaff;
+  padding: 7px 18px;
+  border-radius: 22px;
+  margin-right: 2px;
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 1.04rem;
   font-weight: 500;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
   border: none;
   display: inline-block;
   cursor: pointer;
+  position: relative;
 }
 
-.navbar a:hover {
-  background: #555;
-}
-
-.navbar button {
+.navbar-links a:hover,
+.navbar-links a.active {
   background: #47b1f6;
   color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  margin-right: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
 }
 
-.navbar button:hover {
-  background: #3194cf;
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 }
 
 .navbar-user {
-  margin-left: auto;
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1.06rem;
+  color: #b0c7e6;
+  margin-right: 8px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.navbar-logout-btn {
+  background: #47b1f6;
+  color: #fff;
+  border: none;
+  padding: 7px 18px;
+  border-radius: 22px;
+  font-size: 1.01rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-left: 2px;
+  box-shadow: 0 2px 8px #0001;
+}
+
+.navbar-logout-btn:hover {
+  background: #3194cf;
+}
+
+@media (max-width: 640px) {
+  .navbar-links {
+    gap: 0.2rem;
+  }
+  .navbar-logo-brand {
+    font-size: 1.08rem;
+  }
+  .navbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.4rem 2vw;
+  }
 }

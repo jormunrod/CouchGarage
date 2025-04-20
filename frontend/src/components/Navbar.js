@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import car from '../assets/images/logo.png';
 import '../styles/Navbar.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
@@ -27,20 +28,32 @@ const Navbar = ({ user, fetchUser, setUser }) => {
 
   return (
     <nav className="navbar">
-      <Link to="/">Inicio</Link>
-      {user && user.username ? (
-        <>
-          <Link to="/maintenances/create">Nuevo Mantenimiento</Link>
-          <Link to="/maintenances/mine">Mis Mantenimientos</Link>
-          <span className="navbar-user">Hola, {user.username}</span>
-          <button onClick={handleLogout}>Cerrar sesión</button>
-        </>
-      ) : (
-        <>
-          <Link to="/login">Iniciar sesión</Link>
-          <Link to="/register">Registrarse</Link>
-        </>
-      )}
+      <div className="navbar-logo-area" onClick={() => navigate("/")}>
+        <img src={car} alt="CouchGarage logo" className="navbar-logo" />
+        <span className="navbar-brand">CouchGarage</span>
+      </div>
+      <div className="navbar-links">
+        <Link to="/">Inicio</Link>
+        {user && user.username ? (
+          <>
+            <Link to="/maintenances/create">Nuevo Mantenimiento</Link>
+            <Link to="/maintenances/mine">Mis Mantenimientos</Link>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Iniciar sesión</Link>
+            <Link to="/register">Registrarse</Link>
+          </>
+        )}
+      </div>
+      <div className="navbar-actions">
+        {user && user.username ? (
+          <>
+            <span className="navbar-user">Hola, {user.username}</span>
+            <button className="navbar-logout-btn" onClick={handleLogout}>Cerrar sesión</button>
+          </>
+        ) : null}
+      </div>
     </nav>
   );
 };
