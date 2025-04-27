@@ -95,11 +95,11 @@ Si prefieres levantar manualmente el entorno Docker, sigue estos pasos:
 4. **Construye y levanta los contenedores:**
    Dependiendo de la versión de Docker que tengas, utiliza uno de los siguientes comandos:
    ```bash
-   docker compose up -d --build
+   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
    ```
    o
    ```bash
-   docker-compose up -d --build
+   docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
    ```
 
 5. **Accede a la aplicación:**
