@@ -74,6 +74,7 @@ Para utilizar el script:
    ```
 
 Sigue las instrucciones interactivas que muestra el script para iniciar el entorno en el modo deseado.
+Se recomienda utilizar el modo **DESARROLLO** para una mayor estabilidad y facilidad de depuración.
 
 ### B. Instalación Manual con Docker
 
