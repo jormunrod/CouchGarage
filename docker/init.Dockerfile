@@ -6,4 +6,4 @@ COPY docker/utils/init-couchdb.sh /init-couchdb.sh
 
 RUN chmod +x /init-couchdb.sh
 
-CMD ["/init-couchdb.sh"]
+CMD ["bash", "./init-couchdb.sh"]
